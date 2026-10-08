@@ -1,6 +1,11 @@
-# [Project name]
+# My Lawn Care
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A one-page prototype where DIY homeowners describe their current and desired yard and get a simulated 4-6 week mow/water/fertilize plan.
+
+## My Lawn Care app (artifacts/my-lawn-care)
+
+- Plain HTML/CSS/vanilla JS served by Vite (user requirement: no React, backend, DB, accounts, or external APIs).
+- Guidance text: `src/lawnGuide.js` (editable data only). Plan logic: `generatePlan(inputs)` in `src/generatePlan.js`, simulated and meant to be swapped for an AI/weather call later. `src/main.js` handles screens, validation, and rendering only.
 
 ## Run & Operate
 

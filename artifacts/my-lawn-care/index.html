@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Lawn Care - A simple 4-6 week plan for your yard</title>
+    <meta name="description" content="Tell us about your yard now and the yard you want, and get a simple, friendly 4-6 week mowing, watering, and fertilizing plan." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="My Lawn Care" />
+    <meta property="og:description" content="Describe your yard and get a simple 4-6 week care plan from a friendly neighbor who knows lawns." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="My Lawn Care" />
+    <meta name="twitter:description" content="Describe your yard and get a simple 4-6 week care plan from a friendly neighbor who knows lawns." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 26c2-8 3-13 2-20 3 5 4 10 3 20M14 26c0-7 1-12 4-18 0 6 0 11-1 18M21 26c1-6 3-10 6-13-1 5-2 9-3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <span>My Lawn Care</span>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- Screen 1: Start -->
+      <section id="screen-start" class="screen is-active" aria-labelledby="start-title">
+        <div class="hero">
+          <p class="eyebrow">From one neighbor to another</p>
+          <h1 id="start-title">My Lawn Care</h1>
+          <p class="lede">Tell me what your yard looks like now and what you'd like it to become, and I'll sketch out a simple 4-6 week plan you can actually follow.</p>
+          <button type="button" class="btn btn-primary btn-lg" id="start-btn">Let's get started</button>
+          <ul class="hero-notes" aria-label="What you'll get">
+            <li><span class="dot dot-green"></span>When and how high to mow</li>
+            <li><span class="dot dot-blue"></span>How much to water, and when</li>
+            <li><span class="dot dot-sun"></span>Whether to fertilize this week</li>
+          </ul>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 400 220" preserveAspectRatio="xMidYMax slice">
+            <circle cx="320" cy="60" r="34" fill="#f4d97a"/>
+            <path d="M0 150 Q100 110 200 140 T400 130 V220 H0Z" fill="#9fd3a8"/>
+            <path d="M0 175 Q120 140 240 170 T400 160 V220 H0Z" fill="#4f9d62"/>
+            <g stroke="#2f6e44" stroke-width="3" stroke-linecap="round">
+              <path d="M40 200 l-4 -22 M48 200 l3 -26 M56 200 l6 -18"/>
+              <path d="M170 205 l-5 -20 M178 205 l2 -27 M186 205 l7 -19"/>
+              <path d="M320 200 l-4 -22 M328 200 l3 -25 M336 200 l6 -17"/>
+            </g>
+            <g fill="#7cc4e8">
+              <circle cx="110" cy="70" r="4"/><circle cx="128" cy="92" r="3"/><circle cx="96" cy="100" r="3.5"/>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Screen 2: Form -->
+      <section id="screen-form" class="screen" aria-labelledby="form-title" hidden>
+        <div class="card">
+          <p class="eyebrow">Step 1 of 2</p>
+          <h2 id="form-title">Tell me about your yard</h2>
+          <p class="muted">A few sentences is plenty. Photos are optional but nice.</p>
+
+          <form id="lawn-form" novalidate>
+            <div class="row">
+              <div class="field">
+                <label for="zip">ZIP code</label>
+                <input id="zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="e.g. 43215" aria-describedby="zip-hint zip-error" />
+                <p class="hint" id="zip-hint">Helps match your climate.</p>
+                <p class="error" id="zip-error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="grassType">Grass type</label>
+                <select id="grassType" name="grassType" aria-describedby="grassType-error"></select>
+                <p class="error" id="grassType-error" role="alert"></p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="currentDescription">Describe your yard right now</label>
+              <textarea id="currentDescription" name="currentDescription" rows="4" placeholder="Patchy near the driveway, some dandelions, browning in the afternoon sun..." aria-describedby="currentDescription-error"></textarea>
+              <p class="error" id="currentDescription-error" role="alert"></p>
+              <div class="upload">
+                <label class="upload-btn" for="currentPhotos">Add photos (optional)</label>
+                <input id="currentPhotos" class="visually-hidden-file" type="file" accept="image/*" multiple />
+                <ul class="thumbs" id="currentThumbs" aria-label="Current yard photos"></ul>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="desiredDescription">Describe the yard you want</label>
+              <textarea id="desiredDescription" name="desiredDescription" rows="4" placeholder="Thick, even green grass the kids can play on, no bare spots..." aria-describedby="desiredDescription-error"></textarea>
+              <p class="error" id="desiredDescription-error" role="alert"></p>
+              <div class="upload">
+                <label class="upload-btn" for="desiredPhotos">Add photos (optional)</label>
+                <input id="desiredPhotos" class="visually-hidden-file" type="file" accept="image/*" multiple />
+                <ul class="thumbs" id="desiredThumbs" aria-label="Desired yard photos"></ul>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="btn btn-ghost" id="back-btn">Back</button>
+              <button type="submit" class="btn btn-primary" id="submit-btn">Make my plan</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Screen 3: Results -->
+      <section id="screen-results" class="screen" aria-labelledby="results-title" hidden>
+        <div class="card">
+          <p class="eyebrow">Step 2 of 2</p>
+          <h2 id="results-title" tabindex="-1">Your lawn plan</h2>
+          <p class="summary-text" id="plan-summary"></p>
+          <dl class="inputs" id="input-summary"></dl>
+        </div>
+        <ol class="weeks" id="weeks"></ol>
+        <p class="sim-note">This plan is a simulated preview built from general lawn-care rules of thumb, not live weather or a soil test. Adjust for rain and what you see in your yard.</p>
+        <div class="actions center">
+          <button type="button" class="btn btn-primary" id="restart-btn">Start Over</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

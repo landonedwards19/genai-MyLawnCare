@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "My Lawn Care"
+description = "A one-page prototype for DIY homeowners: enter ZIP code, grass type, current yard state and desired look (with optional photos), and get a simulated 4-6 week mowing, watering, and fertilizing plan built from prewritten guidance. Plain HTML/CSS/JS, no backend."
+version = "1.0.0"
+id = "artifacts/my-lawn-care"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19842
+
+[services.development]
+run = "pnpm --filter @workspace/my-lawn-care run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/my-lawn-care", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/my-lawn-care/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19842"
+BASE_PATH = "/"
