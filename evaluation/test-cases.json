@@ -1,5 +1,5 @@
 {
-  "description": "Cases for scripts/src/run-test-cases.ts. Each case runs POST /api/analyze-yard, confirms the issues marked present (as the review screen pre-checks them), then runs POST /api/generate-plan. Expect rules: issue (key + status: present | absent | not-present), noIssuePresent, noWeekTitle (title), planExcludes (topics: seeding | weeds | shade), feedingTiming (no fertilizer in the guide's noFeedingMonths), seasonTitles (early/mid/late season words in titles match the week's dates), amountsFromGuide (every number+unit comes from the grass guide, confirmed tips, or the reseed reminder).",
+  "description": "Cases for scripts/src/run-test-cases.ts. Each case runs POST /api/analyze-yard, confirms the issues marked present (as the review screen pre-checks them), then runs POST /api/generate-plan. Expect rules: issue (key + status: present | absent | not-present), noIssuePresent, noWeekTitle (title), planExcludes (topics: seeding | weeds | shade), feedingTiming (no fertilizer in the guide's noFeedingMonths), seasonTitles (early/mid/late season words in titles match the week's dates), amountsFromGuide (every number+unit comes from the grass guide, confirmed tips, or the reseed reminder), noWeeklyWatering (weeks: listed plan weeks have no \"per week\" / weekly / once-a-week watering).",
   "cases": [
     {
       "id": "typical",
@@ -39,6 +39,14 @@
         },
         {
           "rule": "amountsFromGuide"
+        },
+        {
+          "rule": "noWeeklyWatering",
+          "weeks": [
+            4,
+            5,
+            6
+          ]
         }
       ]
     },

@@ -10,6 +10,8 @@ import {
   seasonOf,
   planWeeks,
   seedingWeek,
+  isDormant,
+  weeklyWateringIn,
   feedingAllowed,
   saysNoFeeding,
   titleSeasonMismatch,
@@ -62,7 +64,7 @@ export type PlanResult = { source: "ai" | "fallback"; summary: string; weeks: Pl
 
 const SYSTEM_PROMPT = `You write short lawn-care plans for first-time homeowners.
 
-You receive JSON with today's date, the calendar dates of each plan week, the region, the grass type with its guide data (mow height and frequency, water amount and timing, fertilizer guidance), the issues the homeowner confirmed (each with a guide tip), and their goals.
+You receive JSON with today's date, the calendar dates of each plan week, the region, the grass type with its guide data (mow height and frequency, water amount and timing, fertilizer guidance, and a dormant-season entry when some weeks are dormant), the issues the homeowner confirmed (each with a guide tip), and their goals.
 
 Return ONLY a JSON object, with no prose and no code fences, in exactly this shape:
 {
@@ -82,10 +84,11 @@ Rules:
    - If seedingWeek is a number: give the full seeding step ONCE, in that week. In every later week, say exactly: "${RESEED_REMINDER}" Do not repeat the full seeding step, and do not seed before that week.
    - If seedingWeek is null: it is the wrong season to seed. Do NOT tell them to spread seed and do not use the reminder sentence. Instead give a simple step for now (for example rake and mark the bare or thin spots) and say in plain words which season to seed ("seedingSeason").
 6. Mow heights, water amounts, and fertilizer rates must come ONLY from the guide data you were given. Copy numbers exactly as written there. Do not invent numbers and do not do arithmetic to make new ones: if a tip says "about half an inch higher", write those words, not a calculated height. Any amount with a unit (inches, days, weeks, lb) must appear with that same unit in the grass guide data, a confirmed issue's tip, or the reseed sentence; a week number like "week 2" is fine. Avoid other durations such as "for 2 weeks".
-7. A week whose weekDates entry says "no fertilizer" must get NO fertilizer of any kind, even if the guide's fertilizer text suggests a feeding. Respect the timing in the fertilizer guidance. If it says something like "every 6-8 weeks", never schedule two feedings closer together than that; usually that means at most one feeding in this plan. If it names the best season for feeding, use that.
-8. No brand names. Whenever you mention a fertilizer or weed product, say "follow the product label".
-9. If a week has no fertilizer, START its "fertilize" text with "No fertilizer this week." and never suggest feeding anywhere else in that week.
-10. Plain, friendly language for a first-time homeowner. Short sentences, no jargon. "extra" may be an empty array.`;
+7. Dormant weeks: a week whose weekDates entry says "dormant" (also listed in "dormantWeeks") uses grass.dormantSeason for its mow, water, and fertilize text instead of the regular entries. Never recommend weekly watering in a dormant week (no "per week", "weekly", "once a week", or "this week" watering); only say to water if there has been no rain or snow for the time given in dormantSeason.
+8. A week whose weekDates entry says "no fertilizer" must get NO fertilizer of any kind, even if the guide's fertilizer text suggests a feeding. Respect the timing in the fertilizer guidance. If it says something like "every 6-8 weeks", never schedule two feedings closer together than that; usually that means at most one feeding in this plan. If it names the best season for feeding, use that.
+9. No brand names. Whenever you mention a fertilizer or weed product, say "follow the product label".
+10. If a week has no fertilizer, START its "fertilize" text with "No fertilizer this week." (in a dormant week, the dormantSeason fertilize text is fine) and never suggest feeding anywhere else in that week.
+11. Plain, friendly language for a first-time homeowner. Short sentences, no jargon. "extra" may be an empty array.`;
 
 function extractJson(raw: string): unknown {
   const unfenced = raw.replace(/```(?:json)?/gi, "").trim();
@@ -100,11 +103,15 @@ function guideContext(input: PlanInput) {
   const region = lawnGuide.regions[input.zip.charAt(0)]!;
   const confirmed = new Set(input.confirmedIssues.map((i) => i.key));
   const seedingApplies = confirmed.has("bare") || confirmed.has("thin");
+  const dormantWeeks = planWeeks(input.today)
+    .filter((w) => isDormant(input.grassType, input.zip, w.start))
+    .map((w) => w.week);
   return {
     today: input.today,
     weekDates: planWeeks(input.today).map(
       (w) =>
         `Week ${w.week}: ${w.dates} (${seasonOf(w.start)}` +
+        `${isDormant(input.grassType, input.zip, w.start) ? "; dormant" : ""}` +
         `${feedingAllowed(input.grassType, input.zip, w.start) ? "" : "; no fertilizer"})`,
     ),
     region: { name: region.name, climate: region.climate, note: lawnGuide.climateNotes[region.climate] ?? "" },
@@ -114,7 +121,10 @@ function guideContext(input: PlanInput) {
       mow: grass.mow,
       water: grass.water,
       fertilize: grass.fertilize,
+      // Only sent when the date and region put some plan weeks in dormancy.
+      ...(dormantWeeks.length && { dormantSeason: grass.dormant }),
     },
+    ...(dormantWeeks.length && { dormantWeeks }),
     confirmedIssues: input.confirmedIssues.map((i) => ({
       key: i.key,
       label: lawnGuide.issues[i.key].label,
@@ -167,6 +177,8 @@ function ruleViolations(plan: ModelOutput, input: PlanInput, context: object): s
     if (!feedingAllowed(input.grassType, input.zip, dates.start) && !saysNoFeeding(w.fertilize)) {
       problems.push(`week ${w.week} feeds in a no-fertilizer month ("${w.fertilize.slice(0, 60)}")`);
     }
+    const weekly = isDormant(input.grassType, input.zip, dates.start) ? weeklyWateringIn(w) : null;
+    if (weekly) problems.push(`week ${w.week} is dormant but recommends weekly watering ("${weekly}")`);
     const mismatch = titleSeasonMismatch(w.title, dates);
     if (mismatch) problems.push(`week ${w.week} title says "${mismatch}" but the week is ${seasonOf(dates.start)}`);
   }

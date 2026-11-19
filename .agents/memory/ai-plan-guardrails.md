@@ -10,3 +10,4 @@ claude-haiku-4-5 ignores calendar/season rules stated only in the prompt: it see
 
 Topic word checks need exceptions for normal lawn phrases: "shade out weeds" (mowing advice) caused a false shade violation and pushed a valid plan to fallback. Keep topic patterns in the shared lawn-guide planRules so the server and the test runner never disagree.
 A fallback plan can pass every content check, so read the plan source in evaluation results, not just PASS/FAIL.
+Rejecting for a cosmetic slip (e.g. a "Late Winter" title in late December) can push an otherwise correct AI plan to the rule-based fallback, which ignores seasons entirely and then fails the seasonal checks. Weigh repair-in-code vs reject for cosmetic rules.

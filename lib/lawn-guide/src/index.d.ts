@@ -15,6 +15,7 @@ export interface GrassType {
   mow: { height: string; frequency: string };
   water: { amount: string; timing: string };
   fertilize: string;
+  dormant: { mow: string; water: string; fertilize: string };
 }
 
 export interface LawnGuide {
@@ -24,6 +25,7 @@ export interface LawnGuide {
   climateNotes: Record<string, string>;
   seedingMonths: Record<GrassType["season"], number[]>;
   noFeedingMonths: Record<GrassType["season"], number[]>;
+  dormantMonths: Record<GrassType["season"], Record<string, number[]>>;
   weekTitles: string[];
 }
 
@@ -75,6 +77,8 @@ export interface PlanWeekDates {
 export declare function seasonOf(date: Date): string;
 export declare function planWeeks(today: string): PlanWeekDates[];
 export declare function seedingWeek(today: string, season: GrassType["season"]): number | null;
+export declare function isDormant(grassType: string, zip: string, date: Date): boolean;
+export declare function weeklyWateringIn(week: { water: string; extra: string[] }): string | null;
 export declare function feedingAllowed(grassType: string, zip: string, date: Date): boolean;
 export declare function saysNoFeeding(text: string): boolean;
 export declare function titleSeasonMismatch(title: string, week: PlanWeekDates): string | null;

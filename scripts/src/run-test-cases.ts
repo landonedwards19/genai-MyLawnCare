@@ -26,6 +26,7 @@ import {
   amountsIn,
   allowedAmounts,
   TOPIC_PATTERNS,
+  weeklyWateringIn,
   type PlanTopic,
 } from "@workspace/lawn-guide";
 
@@ -45,7 +46,8 @@ type ExpectRule =
   | { rule: "planExcludes"; topics: Topic[] }
   | { rule: "feedingTiming" }
   | { rule: "seasonTitles" }
-  | { rule: "amountsFromGuide" };
+  | { rule: "amountsFromGuide" }
+  | { rule: "noWeeklyWatering"; weeks: number[] };
 
 interface TestCase {
   id: string;
@@ -157,6 +159,18 @@ function check(rule: ExpectRule, analysis: Analysis, plan: Plan, ctx: PlanContex
         })
         .filter(Boolean);
       return { pass: bad.length === 0, text: `week titles match their dates' season (got: ${bad.join(", ") || "all match"})` };
+    }
+    case "noWeeklyWatering": {
+      const hits = plan.weeks
+        .filter((w) => rule.weeks.includes(w.week))
+        .map((w) => ({ week: w.week, hit: weeklyWateringIn(w) }))
+        .filter((x) => x.hit);
+      return {
+        pass: hits.length === 0,
+        text: `weeks ${rule.weeks.join(", ")} have no weekly watering (got: ${
+          hits.map((h) => `week ${h.week} "${h.hit}"`).join(", ") || "none"
+        })`,
+      };
     }
     case "amountsFromGuide": {
       const allowed = allowedAmounts(ctx.input.grassType, ctx.confirmedKeys);

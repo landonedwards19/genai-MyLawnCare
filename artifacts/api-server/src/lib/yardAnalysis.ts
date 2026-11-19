@@ -101,6 +101,26 @@ function enforceEvidence(output: ModelOutput, currentDescription: string, log: L
   };
 }
 
+// Words that suggest trees or shade on the lawn.
+const TREE_OR_SHADE = /\b(trees?|shade|shady|shaded)\b/i;
+
+/**
+ * If trees or shade are mentioned only in desiredDescription (for example
+ * "weed-free under the big oak tree"), the lawn may well be shaded, but the
+ * homeowner didn't describe it as a current problem. Mark shade "unclear"
+ * instead of "absent" (or instead of a keyword match that came only from the goal).
+ */
+function shadeFromGoalOnly(issues: ModelOutput["issues"], input: YardInput, log: Logger): ModelOutput["issues"] {
+  if (!TREE_OR_SHADE.test(input.desiredDescription) || TREE_OR_SHADE.test(input.currentDescription)) return issues;
+  const current = normalize(input.currentDescription);
+  return issues.map((issue) => {
+    if (issue.key !== "shade" || issue.status === "unclear") return issue;
+    if (issue.status === "present" && issue.evidence && current.includes(normalize(issue.evidence))) return issue;
+    log.info({ issue }, "analyze-yard: trees/shade only in the goal, shade marked 'unclear'");
+    return { key: "shade", status: "unclear", evidence: "", severity: "low" };
+  });
+}
+
 async function callModel(input: YardInput): Promise<string> {
   const message = await anthropic.messages.create(
     {
@@ -126,17 +146,18 @@ async function callModel(input: YardInput): Promise<string> {
 }
 
 /** The existing keyword matcher, mapped onto the same response shape. */
-export function fallbackAnalysis(input: YardInput): YardAnalysisResult {
+export function fallbackAnalysis(input: YardInput, log: Logger): YardAnalysisResult {
   const matched = detectIssues(input.currentDescription, input.desiredDescription);
   const current = input.currentDescription.toLowerCase();
+  const issues: ModelOutput["issues"] = ISSUE_KEYS.map((key) => {
+    const hit = matched.find((i) => i.key === key);
+    if (!hit) return { key, status: "absent", evidence: "", severity: "low" };
+    const keyword = hit.keywords.find((k) => current.includes(k)) ?? "";
+    return { key, status: "present", evidence: keyword, severity: "medium" };
+  });
   return {
     source: "fallback",
-    issues: ISSUE_KEYS.map((key) => {
-      const hit = matched.find((i) => i.key === key);
-      if (!hit) return { key, status: "absent", evidence: "", severity: "low" };
-      const keyword = hit.keywords.find((k) => current.includes(k)) ?? "";
-      return { key, status: "present", evidence: keyword, severity: "medium" };
-    }),
+    issues: shadeFromGoalOnly(issues, input, log),
     goals: [],
     otherConcerns: [],
   };
@@ -151,10 +172,11 @@ export async function analyzeYard(input: YardInput, log: Logger): Promise<YardAn
         log.warn({ attempt, raw, error: parsed.error.message }, "analyze-yard: model output failed validation");
         continue;
       }
-      return { source: "ai", ...enforceEvidence(parsed.data, input.currentDescription, log) };
+      const checked = enforceEvidence(parsed.data, input.currentDescription, log);
+      return { source: "ai", ...checked, issues: shadeFromGoalOnly(checked.issues, input, log) };
     } catch (err) {
       log.warn({ attempt, err: err instanceof Error ? err.message : String(err) }, "analyze-yard: model call failed");
     }
   }
-  return fallbackAnalysis(input);
+  return fallbackAnalysis(input, log);
 }
