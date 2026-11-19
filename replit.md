@@ -5,7 +5,14 @@ A one-page prototype where DIY homeowners describe their current and desired yar
 ## My Lawn Care app (artifacts/my-lawn-care)
 
 - Plain HTML/CSS/vanilla JS served by Vite (user requirement: no React, backend, DB, accounts, or external APIs).
-- Guidance text: `src/lawnGuide.js` (editable data only). Plan logic: `generatePlan(inputs)` in `src/generatePlan.js`, simulated and meant to be swapped for an AI/weather call later. `src/main.js` handles screens, validation, and rendering only.
+- Guidance text and the keyword matcher live in the shared plain-JS package `lib/lawn-guide` (`lawnGuide.js` = editable data, `detectIssues.js` = matcher) so both the page and the API server use them. Plan logic: `generatePlan(inputs)` in `src/generatePlan.js`, simulated and meant to be swapped for an AI/weather call later. `src/main.js` handles screens, validation, and rendering only.
+
+## Yard analysis API (artifacts/api-server)
+
+- `POST /api/analyze-yard` uses Replit AI Integrations (Anthropic, `claude-haiku-4-5`, no user key); AI calls stay server-side only.
+- 8s timeout per attempt, one retry, then falls back to the keyword matcher (`source: "fallback"`). Descriptions truncated to 1,000 chars. In-memory rate limit 30/hour/IP (resets on restart).
+- A "present" issue whose evidence isn't an exact phrase from currentDescription is downgraded to "unclear" in code.
+- Logic in `src/lib/yardAnalysis.ts`; the page does not call this endpoint yet.
 
 ## Run & Operate
 

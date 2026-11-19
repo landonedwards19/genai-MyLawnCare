@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: yard
+    description: Yard analysis
 paths:
   /healthz:
     get:
@@ -24,8 +26,100 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /analyze-yard:
+    post:
+      operationId: analyzeYard
+      tags: [yard]
+      summary: Analyze a yard description
+      description: >
+        Uses a small AI model to pick out current yard problems and goals from the
+        user's descriptions. Falls back to the keyword matcher if the AI is unavailable.
+        Descriptions longer than 1,000 characters are truncated. Limited to 30 requests
+        per hour per IP.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/YardInput"
+      responses:
+        "200":
+          description: Yard analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/YardAnalysis"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    YardInput:
+      type: object
+      properties:
+        zip:
+          type: string
+          pattern: "^[0-9]{5}$"
+        grassType:
+          type: string
+          minLength: 1
+        currentDescription:
+          type: string
+          minLength: 1
+        desiredDescription:
+          type: string
+          minLength: 1
+      required: [zip, grassType, currentDescription, desiredDescription]
+    YardIssue:
+      type: object
+      properties:
+        key:
+          type: string
+          enum: [bare, weeds, dry, thin, shade]
+        status:
+          type: string
+          enum: [present, absent, unclear]
+        evidence:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high]
+      required: [key, status, evidence, severity]
+    YardAnalysis:
+      type: object
+      properties:
+        source:
+          type: string
+          enum: [ai, fallback]
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/YardIssue"
+        goals:
+          type: array
+          items:
+            type: string
+        otherConcerns:
+          type: array
+          items:
+            type: string
+      required: [source, issues, goals, otherConcerns]
     HealthStatus:
       type: object
       properties:

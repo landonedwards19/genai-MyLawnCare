@@ -1,7 +1,8 @@
 /*
  * generatePlan(inputs) - SIMULATED plan generator.
  *
- * This is a pure, rule-based stand-in that only uses lawnGuide.js.
+ * This is a pure, rule-based stand-in that only uses the shared lawn guide
+ * (lib/lawn-guide: guidance text in lawnGuide.js, keyword matcher in detectIssues.js).
  * It is meant to be replaced later by a real AI or weather API call.
  * It is async-friendly: main.js awaits it, so swapping in a network call
  * that returns a Promise of the same shape needs no other changes.
@@ -10,16 +11,13 @@
  *           currentPhotoCount, desiredPhotoCount }
  * returns: { summary, region, grassLabel, issues, weeks: [{ week, title, mow, water, fertilize, extra }] }
  */
-import { lawnGuide } from "./lawnGuide.js";
+import { lawnGuide, detectIssues } from "@workspace/lawn-guide";
 
 export function generatePlan(inputs) {
   const grass = lawnGuide.grassTypes[inputs.grassType] || lawnGuide.grassTypes["not-sure"];
   const region = lawnGuide.regions[String(inputs.zip).charAt(0)] || { name: "Unknown region", climate: "mild" };
 
-  const text = `${inputs.currentDescription} ${inputs.desiredDescription}`.toLowerCase();
-  const issues = Object.entries(lawnGuide.issues)
-    .filter(([, issue]) => issue.keywords.some((k) => text.includes(k)))
-    .map(([key, issue]) => ({ key, ...issue }));
+  const issues = detectIssues(inputs.currentDescription, inputs.desiredDescription);
 
   // More issues means a slightly longer plan (4 to 6 weeks).
   const weekCount = Math.min(6, 4 + Math.min(issues.length, 2));

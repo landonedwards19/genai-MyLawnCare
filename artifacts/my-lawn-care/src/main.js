@@ -1,5 +1,5 @@
 import "./styles.css";
-import { lawnGuide } from "./lawnGuide.js";
+import { lawnGuide } from "@workspace/lawn-guide";
 import { generatePlan } from "./generatePlan.js";
 
 const $ = (id) => document.getElementById(id);

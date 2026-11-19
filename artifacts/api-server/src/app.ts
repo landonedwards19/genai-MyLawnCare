@@ -6,6 +6,11 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// Requests arrive through Replit's proxies, which overwrite any client-supplied
+// X-Forwarded-For, so the leftmost address is the real client IP (used by the
+// per-IP rate limit).
+app.set("trust proxy", true);
+
 app.use(
   pinoHttp({
     logger,
