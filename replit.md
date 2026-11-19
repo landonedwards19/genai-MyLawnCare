@@ -12,7 +12,8 @@ A one-page prototype where DIY homeowners describe their current and desired yar
 - `POST /api/analyze-yard` uses Replit AI Integrations (Anthropic, `claude-haiku-4-5`, no user key); AI calls stay server-side only.
 - 8s timeout per attempt, one retry, then falls back to the keyword matcher (`source: "fallback"`). Descriptions truncated to 1,000 chars. In-memory rate limit 30/hour/IP (resets on restart).
 - A "present" issue whose evidence isn't an exact phrase from currentDescription is downgraded to "unclear" in code.
-- Logic in `src/lib/yardAnalysis.ts`; the page does not call this endpoint yet.
+- Logic in `src/lib/yardAnalysis.ts`.
+- Page flow: Form (1 of 3) -> review "Here's what I noticed" (2 of 3) -> Plan (3 of 3). `src/analyzeYard.js` calls the endpoint and, if it's unreachable or rate-limited, runs the same keyword matcher locally (labelled as fallback). Only issues left checked on the review screen are passed to `generatePlan` as `issueKeys`.
 
 ## Run & Operate
 

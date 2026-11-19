@@ -1,12 +1,15 @@
 import "./styles.css";
 import { lawnGuide } from "@workspace/lawn-guide";
 import { generatePlan } from "./generatePlan.js";
+import { analyzeYard } from "./analyzeYard.js";
 
 const $ = (id) => document.getElementById(id);
-const screens = { start: $("screen-start"), form: $("screen-form"), results: $("screen-results") };
+const screens = { start: $("screen-start"), form: $("screen-form"), review: $("screen-review"), results: $("screen-results") };
 const form = $("lawn-form");
 
 const photoUrls = { current: [], desired: [] };
+// Form values that were last sent for analysis, kept for the plan step.
+let reviewedValues = null;
 
 function show(name, focusEl) {
   Object.entries(screens).forEach(([key, el]) => { el.hidden = key !== name; });
@@ -155,19 +158,107 @@ function renderPlan(values, plan) {
   });
 }
 
+// Review screen
+const SOURCE_LABELS = {
+  ai: "Found by AI",
+  fallback: "AI unavailable. Found by keyword matching, so please double-check.",
+};
+
+function issueRow(issue) {
+  const li = el("li", "issue");
+  const id = `issue-${issue.key}`;
+  const box = el("input");
+  box.type = "checkbox";
+  box.id = id;
+  box.name = "issue";
+  box.value = issue.key;
+  box.checked = issue.status === "present";
+  const label = el("label");
+  label.htmlFor = id;
+  label.append(el("span", null, lawnGuide.issues[issue.key].label));
+  if (issue.status === "present" && issue.evidence) {
+    label.append(el("span", "issue-evidence", `You said: '${issue.evidence}'`));
+  } else if (issue.status === "unclear") {
+    label.append(el("span", "issue-note", "Not sure. Check this if it applies."));
+  }
+  li.append(box, label);
+  return li;
+}
+
+function renderReview(analysis) {
+  const tag = $("source-tag");
+  const source = analysis.source === "ai" ? "ai" : "fallback";
+  tag.textContent = SOURCE_LABELS[source];
+  tag.className = `source-tag is-${source}`;
+
+  const known = analysis.issues.filter((i) => lawnGuide.issues[i.key]);
+  const main = known.filter((i) => i.status !== "absent");
+  const absent = known.filter((i) => i.status === "absent");
+
+  const list = $("issue-list");
+  list.innerHTML = "";
+  // Present issues first, then unclear ones.
+  [...main.filter((i) => i.status === "present"), ...main.filter((i) => i.status === "unclear")]
+    .forEach((i) => list.append(issueRow(i)));
+  if (!main.length) list.append(el("li", "muted", "I didn't spot any of the usual problems. If something's bothering you, add it below."));
+
+  const missedList = $("missed-list");
+  missedList.innerHTML = "";
+  absent.forEach((i) => missedList.append(issueRow(i)));
+  $("missed").hidden = !absent.length;
+  $("missed").open = false;
+
+  const goals = $("review-goals");
+  goals.hidden = !analysis.goals.length;
+  goals.textContent = analysis.goals.length ? `Your goals: ${analysis.goals.join(", ")}.` : "";
+
+  const other = $("review-other");
+  other.hidden = !analysis.otherConcerns.length;
+  other.textContent = analysis.otherConcerns.length
+    ? `I can't plan for these yet: ${analysis.otherConcerns.join(", ")}.`
+    : "";
+}
+
+function checkedIssueKeys() {
+  return Array.from(document.querySelectorAll('#screen-review input[name="issue"]:checked')).map((b) => b.value);
+}
+
+function setLoading(on) {
+  const btn = $("submit-btn");
+  btn.disabled = on;
+  $("loading").textContent = on ? "Reading your yard..." : "";
+}
+
 // Events
 $("start-btn").addEventListener("click", () => show("form", $("zip")));
 $("back-btn").addEventListener("click", () => show("start", $("start-btn")));
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if ($("submit-btn").disabled) return;
   const { values, errors } = validate();
   const firstBad = Object.keys(errors)[0];
   if (firstBad) { $(firstBad).focus(); return; }
+  setLoading(true);
+  try {
+    const analysis = await analyzeYard(values);
+    reviewedValues = values;
+    renderReview(analysis);
+    show("review", $("review-title"));
+  } finally {
+    setLoading(false);
+  }
+});
+
+$("edit-btn").addEventListener("click", () => show("form", $("currentDescription")));
+
+$("confirm-btn").addEventListener("click", async () => {
+  const values = reviewedValues;
   const plan = await generatePlan({
     ...values,
     currentPhotoCount: photoUrls.current.length,
     desiredPhotoCount: photoUrls.desired.length,
+    issueKeys: checkedIssueKeys(),
   });
   renderPlan(values, plan);
   show("results", $("results-title"));
@@ -181,5 +272,8 @@ $("restart-btn").addEventListener("click", () => {
   $("desiredThumbs").innerHTML = "";
   $("weeks").innerHTML = "";
   $("input-summary").innerHTML = "";
+  $("issue-list").innerHTML = "";
+  $("missed-list").innerHTML = "";
+  reviewedValues = null;
   show("start", $("start-btn"));
 });

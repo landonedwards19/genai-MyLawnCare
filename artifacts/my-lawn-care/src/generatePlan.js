@@ -8,7 +8,9 @@
  * that returns a Promise of the same shape needs no other changes.
  *
  * inputs: { zip, grassType, currentDescription, desiredDescription,
- *           currentPhotoCount, desiredPhotoCount }
+ *           currentPhotoCount, desiredPhotoCount, issueKeys? }
+ * issueKeys: the issues the user confirmed on the review screen (e.g. ["bare", "weeds"]).
+ *            If omitted, issues are detected from the descriptions by keyword.
  * returns: { summary, region, grassLabel, issues, weeks: [{ week, title, mow, water, fertilize, extra }] }
  */
 import { lawnGuide, detectIssues } from "@workspace/lawn-guide";
@@ -17,7 +19,11 @@ export function generatePlan(inputs) {
   const grass = lawnGuide.grassTypes[inputs.grassType] || lawnGuide.grassTypes["not-sure"];
   const region = lawnGuide.regions[String(inputs.zip).charAt(0)] || { name: "Unknown region", climate: "mild" };
 
-  const issues = detectIssues(inputs.currentDescription, inputs.desiredDescription);
+  const issues = Array.isArray(inputs.issueKeys)
+    ? inputs.issueKeys
+        .filter((key) => lawnGuide.issues[key])
+        .map((key) => ({ key, ...lawnGuide.issues[key] }))
+    : detectIssues(inputs.currentDescription, inputs.desiredDescription);
 
   // More issues means a slightly longer plan (4 to 6 weeks).
   const weekCount = Math.min(6, 4 + Math.min(issues.length, 2));
@@ -49,7 +55,7 @@ export function generatePlan(inputs) {
 
   const photos = (inputs.currentPhotoCount || 0) + (inputs.desiredPhotoCount || 0);
   const issueText = issues.length
-    ? ` I noticed you mentioned ${issues.map((i) => i.label.toLowerCase()).join(", ")}, so I've folded in a few fixes.`
+    ? ` ${Array.isArray(inputs.issueKeys) ? "You flagged" : "I noticed you mentioned"} ${issues.map((i) => i.label.toLowerCase()).join(", ")}, so I've folded in a few fixes.`
     : " Your yard sounds in decent shape, so this plan focuses on a steady routine.";
   const summary =
     `Here's a ${weekCount}-week plan for ${grass.label === "Not sure" ? "your lawn" : grass.label} in the ${region.name}. ` +

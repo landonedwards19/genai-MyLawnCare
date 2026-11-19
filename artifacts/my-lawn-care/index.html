@@ -60,7 +60,7 @@
       <!-- Screen 2: Form -->
       <section id="screen-form" class="screen" aria-labelledby="form-title" hidden>
         <div class="card">
-          <p class="eyebrow">Step 1 of 2</p>
+          <p class="eyebrow">Step 1 of 3</p>
           <h2 id="form-title">Tell me about your yard</h2>
           <p class="muted">A few sentences is plenty. Photos are optional but nice.</p>
 
@@ -103,16 +103,45 @@
 
             <div class="actions">
               <button type="button" class="btn btn-ghost" id="back-btn">Back</button>
-              <button type="submit" class="btn btn-primary" id="submit-btn">Make my plan</button>
+              <button type="submit" class="btn btn-primary" id="submit-btn">Continue</button>
             </div>
+            <p class="loading" id="loading" role="status" aria-live="polite"></p>
           </form>
         </div>
       </section>
 
-      <!-- Screen 3: Results -->
+      <!-- Screen 3: Review what was noticed -->
+      <section id="screen-review" class="screen" aria-labelledby="review-title" hidden>
+        <div class="card">
+          <p class="eyebrow">Step 2 of 3</p>
+          <p class="source-tag" id="source-tag"></p>
+          <h2 id="review-title" tabindex="-1">Here's what I noticed</h2>
+          <p class="muted">Uncheck anything that's wrong. Only checked items go into your plan.</p>
+
+          <fieldset class="issues">
+            <legend class="visually-hidden">Yard issues</legend>
+            <ul class="issue-list" id="issue-list"></ul>
+          </fieldset>
+
+          <details class="missed" id="missed">
+            <summary>Add something I missed</summary>
+            <ul class="issue-list" id="missed-list"></ul>
+          </details>
+
+          <p class="review-goals" id="review-goals" hidden></p>
+          <p class="review-other" id="review-other" hidden></p>
+
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" id="edit-btn">Back to edit</button>
+            <button type="button" class="btn btn-primary" id="confirm-btn">Looks right. Make my plan.</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Results -->
       <section id="screen-results" class="screen" aria-labelledby="results-title" hidden>
         <div class="card">
-          <p class="eyebrow">Step 2 of 2</p>
+          <p class="eyebrow">Step 3 of 3</p>
           <h2 id="results-title" tabindex="-1">Your lawn plan</h2>
           <p class="summary-text" id="plan-summary"></p>
           <dl class="inputs" id="input-summary"></dl>

@@ -147,3 +147,37 @@ textarea { resize: vertical; min-height: 110px; }
   .task-extra { grid-column: 1 / -1; }
   .week { padding: 24px 28px; }
 }
+
+/* Loading */
+.loading { margin: 14px 0 0; text-align: right; color: var(--blue); font-weight: 600; }
+.loading:empty { display: none; }
+.loading::before {
+  content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px;
+  border: 2px solid var(--blue-tint); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn[disabled] { opacity: .6; cursor: progress; transform: none; }
+
+/* Review */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.source-tag { display: inline-block; font-size: .85rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; margin-bottom: 12px; }
+.source-tag.is-ai { background: var(--blue-tint); color: #1d6a97; }
+.source-tag.is-fallback { background: var(--sun-tint); color: #8a6514; }
+.issues { border: 0; padding: 0; margin: 18px 0 0; }
+.issue-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.issue-list:empty { display: none; }
+.issue { display: flex; gap: 12px; align-items: flex-start; background: #f8fbf6; border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; transition: background-color .15s ease, border-color .15s ease; }
+.issue:has(input:checked) { background: var(--green-tint); border-color: #a9cbb0; }
+.issue input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--green); flex: none; }
+.issue input:focus-visible { outline: none; box-shadow: var(--focus); }
+.issue label { margin: 0; cursor: pointer; }
+.issue-note { display: block; font-size: .88rem; color: var(--ink-soft); margin-top: 2px; }
+.issue-evidence { display: block; font-size: .88rem; font-style: italic; color: var(--ink-soft); margin-top: 2px; }
+.missed { margin-top: 16px; }
+.missed summary { cursor: pointer; font-weight: 600; color: var(--green-dark); padding: 6px 0; }
+.missed summary:focus-visible { outline: none; box-shadow: var(--focus); border-radius: 6px; }
+.missed .issue-list { margin-top: 8px; }
+.review-goals, .review-other { margin: 18px 0 0; padding: 12px 14px; border-radius: 12px; }
+.review-goals { background: var(--blue-tint); }
+.review-other { background: var(--sun-tint); }
+#screen-review .actions { margin-top: 24px; flex-wrap: wrap; }
