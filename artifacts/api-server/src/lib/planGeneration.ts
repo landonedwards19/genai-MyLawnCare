@@ -142,58 +142,113 @@ function guideContext(input: PlanInput) {
 
 const numbersIn = (text: string) => text.match(/\d+(?:\.\d+)?/g) ?? [];
 
+/** One failed check: a short name for the logs and an instruction for the model's retry. */
+export interface Violation {
+  check: string;
+  fix: string;
+}
+
+/** "Week 3", "Weeks 4-6", "Weeks 2, 4-5" */
+function weekList(weeks: number[]): string {
+  const sorted = [...new Set(weeks)].sort((a, b) => a - b);
+  const runs: string[] = [];
+  for (let i = 0; i < sorted.length; ) {
+    let j = i;
+    while (j + 1 < sorted.length && sorted[j + 1] === sorted[j]! + 1) j++;
+    runs.push(i === j ? `${sorted[i]}` : `${sorted[i]}-${sorted[j]}`);
+    i = j + 1;
+  }
+  return `${sorted.length === 1 ? "Week" : "Weeks"} ${runs.join(", ")}`;
+}
+
 /**
- * Content rules checked in code. Returns the reasons the plan must be rejected
- * (empty when it passes).
+ * Content rules checked in code. Returns every failed check (empty when the
+ * plan passes), each with an instruction the model can act on in a retry.
  */
-function ruleViolations(plan: ModelOutput, input: PlanInput, context: object): string[] {
+function ruleViolations(plan: ModelOutput, input: PlanInput, context: object): Violation[] {
   const weeks = planWeeks(input.today);
+  const grass = lawnGuide.grassTypes[input.grassType]!;
   const confirmed = new Set(input.confirmedIssues.map((i) => i.key));
   const allText = [
     plan.summary,
     ...plan.weeks.flatMap((w) => [w.title, w.mow, w.water, w.fertilize, w.why, ...w.extra]),
   ].join("\n");
-  const problems: string[] = [];
+  const problems: Violation[] = [];
 
   for (const [topic, { allowedBy, pattern }] of Object.entries(TOPIC_PATTERNS)) {
     if (allowedBy.some((k) => confirmed.has(k))) continue;
     const hit = allText.match(pattern);
-    if (hit) problems.push(`mentions ${topic} ("${hit[0]}") but no matching issue was confirmed`);
+    if (hit) {
+      problems.push({
+        check: `topic-${topic}`,
+        fix: `The plan mentions ${topic} ("${hit[0]}"), but the homeowner did not confirm that issue: remove every ${topic} step and mention.`,
+      });
+    }
   }
 
-  const seedWeek = (confirmed.has("bare") || confirmed.has("thin"))
-    ? seedingWeek(input.today, lawnGuide.grassTypes[input.grassType]!.season)
-    : null;
+  const seedWeek = (confirmed.has("bare") || confirmed.has("thin")) ? seedingWeek(input.today, grass.season) : null;
   if (seedWeek === null && allText.includes(RESEED_REMINDER)) {
-    problems.push("schedules seeding in a season when this grass should not be seeded");
+    problems.push({
+      check: "seeding-season",
+      fix: "It is the wrong season to seed this grass: remove the reseed reminder and any seeding step, and say which season to seed instead (seedingSeason).",
+    });
   }
 
   if (confirmed.size === 0 && plan.weeks.some((w) => w.title.trim().toLowerCase() === TROUBLE_TITLE.toLowerCase())) {
-    problems.push(`uses the title "${TROUBLE_TITLE}" with no confirmed issues`);
+    problems.push({
+      check: "trouble-title",
+      fix: `No issues were confirmed: do not title any week "${TROUBLE_TITLE}".`,
+    });
   }
 
+  const fedWeeks: number[] = [];
+  const wateredDormantWeeks: number[] = [];
   for (const w of plan.weeks) {
     const dates = weeks[w.week - 1]!;
-    if (!feedingAllowed(input.grassType, input.zip, dates.start) && !saysNoFeeding(w.fertilize)) {
-      problems.push(`week ${w.week} feeds in a no-fertilizer month ("${w.fertilize.slice(0, 60)}")`);
-    }
-    const weekly = isDormant(input.grassType, input.zip, dates.start) ? weeklyWateringIn(w) : null;
-    if (weekly) problems.push(`week ${w.week} is dormant but recommends weekly watering ("${weekly}")`);
+    if (!feedingAllowed(input.grassType, input.zip, dates.start) && !saysNoFeeding(w.fertilize)) fedWeeks.push(w.week);
+    if (isDormant(input.grassType, input.zip, dates.start) && weeklyWateringIn(w)) wateredDormantWeeks.push(w.week);
     const mismatch = titleSeasonMismatch(w.title, dates);
-    if (mismatch) problems.push(`week ${w.week} title says "${mismatch}" but the week is ${seasonOf(dates.start)}`);
+    if (mismatch) {
+      problems.push({
+        check: "season-title",
+        fix: `Week ${w.week} (${dates.dates}) is ${seasonOf(dates.start)}, but its title says "${mismatch}": name ${seasonOf(dates.start)} or leave the season out of the title.`,
+      });
+    }
+  }
+  if (fedWeeks.length) {
+    problems.push({
+      check: "fertilizer-timing",
+      fix: `${weekList(fedWeeks)} must get no fertilizer (dormant or the wrong time of year for this grass): start their "fertilize" text with "No fertilizer this week." and suggest no feeding.`,
+    });
+  }
+  if (wateredDormantWeeks.length) {
+    problems.push({
+      check: "dormant-watering",
+      fix: `${weekList(wateredDormantWeeks)} ${wateredDormantWeeks.length === 1 ? "is" : "are"} dormant season: do not recommend weekly watering; use the dormant-season guidance instead ("${grass.dormant.water}").`,
+    });
   }
 
   // Amounts with units must appear with the same unit in the guide data.
   const allowedUnits = allowedAmounts(input.grassType, [...confirmed]);
   const inventedAmounts = [...new Set(amountsIn(allText).filter((a) => !allowedUnits.has(a)))];
-  if (inventedAmounts.length) problems.push(`uses amounts not in the guide data: ${inventedAmounts.join(", ")}`);
+  if (inventedAmounts.length) {
+    problems.push({
+      check: "invented-amounts",
+      fix: `These amounts are not in the guide data: ${inventedAmounts.map((a) => `"${a}"`).join(", ")}. Use only amounts written in the guide data, or say it in words without a number.`,
+    });
+  }
 
   // Every number must come from the data we sent (guide values, tips, dates),
   // apart from week references like "week 2".
   const allowed = new Set([...numbersIn(JSON.stringify(context)), ...numbersIn(RESEED_REMINDER)]);
   const withoutWeekRefs = allText.replace(/\bweeks?\s+\d+(?:\s*(?:-|–|and|to)\s*\d+)?/gi, "");
   const invented = [...new Set(numbersIn(withoutWeekRefs).filter((n) => !allowed.has(n)))];
-  if (invented.length) problems.push(`uses numbers not in the guide data: ${invented.join(", ")}`);
+  if (invented.length) {
+    problems.push({
+      check: "invented-numbers",
+      fix: `These numbers are not in the data you were given: ${invented.join(", ")}. Remove them or copy numbers exactly from the guide data.`,
+    });
+  }
 
   return problems;
 }
@@ -217,13 +272,15 @@ function addReseedReminders(plan: ModelOutput, input: PlanInput): ModelOutput {
   };
 }
 
-async function callModel(context: object): Promise<string> {
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+async function callModel(messages: ChatMessage[]): Promise<string> {
   const message = await anthropic.messages.create(
     {
       model: MODEL,
       max_tokens: 8192,
       system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: JSON.stringify(context) }],
+      messages,
     },
     { timeout: TIMEOUT_MS, maxRetries: 0 },
   );
@@ -233,35 +290,80 @@ async function callModel(context: object): Promise<string> {
     .join("");
 }
 
-/** The existing rule-based generatePlan, limited to the confirmed issues. */
+/** The message sent with the retry: exactly which checks failed and how to fix them. */
+function retryInstructions(fixes: string[]): string {
+  return [
+    "Your plan failed these checks:",
+    ...fixes.map((fix, i) => `${i + 1}. ${fix}`),
+    "",
+    "Return the full corrected plan as ONLY a JSON object in the same shape. Keep everything else that was correct, and follow all the original rules.",
+  ].join("\n");
+}
+
+/** The rule-based generatePlan (season-aware), limited to the confirmed issues. */
 export function fallbackPlan(input: PlanInput): PlanResult {
   const plan = ruleBasedPlan({
     zip: input.zip,
     grassType: input.grassType,
+    today: input.today,
     issueKeys: input.confirmedIssues.map((i) => i.key),
   });
   return { source: "fallback", summary: plan.summary, weeks: plan.weeks };
 }
 
-export async function generateLawnPlan(input: PlanInput, log: Logger): Promise<PlanResult> {
+/**
+ * Writes the plan with the AI. A plan that fails a check gets ONE retry in which
+ * the model sees its previous answer and exactly what failed; if that also
+ * fails (or the call errors), the rule-based plan is returned.
+ * options.skipAi: go straight to the rule-based plan (used to test the fallback).
+ */
+export async function generateLawnPlan(
+  input: PlanInput,
+  log: Logger,
+  options: { skipAi?: boolean } = {},
+): Promise<PlanResult> {
+  if (options.skipAi) {
+    log.info("generate-plan: AI skipped on request, using the rule-based plan");
+    return fallbackPlan(input);
+  }
   const context = guideContext(input);
+  const messages: ChatMessage[] = [{ role: "user", content: JSON.stringify(context) }];
+
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    let raw: string;
     try {
-      const raw = await callModel(context);
-      const parsed = modelOutputSchema.safeParse(extractJson(raw));
-      if (!parsed.success) {
-        log.warn({ attempt, raw, error: parsed.error.message }, "generate-plan: model output failed validation");
-        continue;
-      }
-      const problems = ruleViolations(parsed.data, input, context);
-      if (problems.length) {
-        log.warn({ attempt, problems, plan: parsed.data }, "generate-plan: plan broke the rules, rejected");
-        continue;
-      }
-      return { source: "ai", ...addReseedReminders(parsed.data, input) };
+      raw = await callModel(messages);
     } catch (err) {
       log.warn({ attempt, err: err instanceof Error ? err.message : String(err) }, "generate-plan: model call failed");
+      continue; // nothing to correct, so the retry resends the same request
     }
+
+    let failed: Violation[];
+    let plan: ModelOutput | null = null;
+    try {
+      const parsed = modelOutputSchema.safeParse(extractJson(raw));
+      if (parsed.success) {
+        plan = parsed.data;
+        failed = ruleViolations(plan, input, context);
+      } else {
+        failed = [{ check: "json-shape", fix: `The JSON did not match the required shape: ${parsed.error.message}` }];
+      }
+    } catch (err) {
+      failed = [{ check: "json-parse", fix: "The reply was not a valid JSON object. Return only the JSON object." }];
+    }
+
+    if (!failed.length && plan) {
+      log.info({ attempt, failedChecks: [] }, "generate-plan: plan passed all checks");
+      return { source: "ai", ...addReseedReminders(plan, input) };
+    }
+
+    log.warn(
+      { attempt, failedChecks: failed.map((f) => f.check), problems: failed.map((f) => f.fix), raw },
+      "generate-plan: plan failed checks",
+    );
+    // Retry with the previous answer and what to fix.
+    messages.push({ role: "assistant", content: raw }, { role: "user", content: retryInstructions(failed.map((f) => f.fix)) });
   }
+  log.warn("generate-plan: no valid AI plan after the retry, using the rule-based plan");
   return fallbackPlan(input);
 }

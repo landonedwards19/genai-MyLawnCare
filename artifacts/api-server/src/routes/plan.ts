@@ -50,8 +50,11 @@ router.post(
       today: body.today,
     };
 
-    const result = GeneratePlanResponse.parse(await generateLawnPlan(input, req.log));
-    req.log.info({ request: input, response: result }, "generate-plan");
+    // Development-only switch for testing the rule-based fallback (scripts/src/run-test-cases.ts).
+    const skipAi = process.env.NODE_ENV !== "production" && req.get("x-plan-skip-ai") === "1";
+
+    const result = GeneratePlanResponse.parse(await generateLawnPlan(input, req.log, { skipAi }));
+    req.log.info({ request: input, skipAi, response: result }, "generate-plan");
     res.json(result);
   },
 );

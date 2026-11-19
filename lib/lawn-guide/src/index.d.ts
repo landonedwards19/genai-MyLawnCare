@@ -26,7 +26,6 @@ export interface LawnGuide {
   seedingMonths: Record<GrassType["season"], number[]>;
   noFeedingMonths: Record<GrassType["season"], number[]>;
   dormantMonths: Record<GrassType["season"], Record<string, number[]>>;
-  weekTitles: string[];
 }
 
 export declare const lawnGuide: LawnGuide;
@@ -56,6 +55,8 @@ export interface RuleBasedPlan {
 export declare function generatePlan(inputs: {
   zip: string;
   grassType: string;
+  /** YYYY-MM-DD; defaults to the local date. */
+  today?: string;
   currentDescription?: string;
   desiredDescription?: string;
   currentPhotoCount?: number;

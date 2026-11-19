@@ -1,5 +1,5 @@
 {
-  "description": "Cases for scripts/src/run-test-cases.ts. Each case runs POST /api/analyze-yard, confirms the issues marked present (as the review screen pre-checks them), then runs POST /api/generate-plan. Expect rules: issue (key + status: present | absent | not-present), noIssuePresent, noWeekTitle (title), planExcludes (topics: seeding | weeds | shade), feedingTiming (no fertilizer in the guide's noFeedingMonths), seasonTitles (early/mid/late season words in titles match the week's dates), amountsFromGuide (every number+unit comes from the grass guide, confirmed tips, or the reseed reminder), noWeeklyWatering (weeks: listed plan weeks have no \"per week\" / weekly / once-a-week watering).",
+  "description": "Cases for scripts/src/run-test-cases.ts. Each case runs POST /api/analyze-yard, confirms the issues marked present (as the review screen pre-checks them), then runs POST /api/generate-plan. Expect rules: issue (key + status: present | absent | not-present), noIssuePresent, noWeekTitle (title), planExcludes (topics: seeding | weeds | shade), feedingTiming (no fertilizer in the guide's noFeedingMonths), seasonTitles (early/mid/late season words in titles match the week's dates), amountsFromGuide (every number+unit comes from the grass guide, confirmed tips, or the reseed reminder), noWeeklyWatering (weeks: listed plan weeks have no \"per week\" / weekly / once-a-week watering), planSource (source: ai | fallback). A case with \"skipAi\": true sends the dev-only x-plan-skip-ai header so the server returns the rule-based plan; the yard analysis still uses the AI.",
   "cases": [
     {
       "id": "typical",
@@ -49,6 +49,60 @@
           ]
         }
       ]
+    },
+    {
+      "id": "typical-fallback",
+      "name": "1b. Typical (forced fallback plan)",
+      "input": {
+        "zip": "46556",
+        "grassType": "tall-fescue",
+        "currentDescription": "Mostly green but thin in spots, some dandelions and clover, a couple bare patches near the driveway.",
+        "desiredDescription": "Thick, even, dark green lawn with no weeds or bare spots."
+      },
+      "expect": [
+        {
+          "rule": "issue",
+          "key": "bare",
+          "status": "present"
+        },
+        {
+          "rule": "issue",
+          "key": "weeds",
+          "status": "present"
+        },
+        {
+          "rule": "issue",
+          "key": "thin",
+          "status": "present"
+        },
+        {
+          "rule": "issue",
+          "key": "shade",
+          "status": "absent"
+        },
+        {
+          "rule": "feedingTiming"
+        },
+        {
+          "rule": "seasonTitles"
+        },
+        {
+          "rule": "amountsFromGuide"
+        },
+        {
+          "rule": "noWeeklyWatering",
+          "weeks": [
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "rule": "planSource",
+          "source": "fallback"
+        }
+      ],
+      "skipAi": true
     },
     {
       "id": "challenge",

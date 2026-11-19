@@ -47,11 +47,14 @@ type ExpectRule =
   | { rule: "feedingTiming" }
   | { rule: "seasonTitles" }
   | { rule: "amountsFromGuide" }
-  | { rule: "noWeeklyWatering"; weeks: number[] };
+  | { rule: "noWeeklyWatering"; weeks: number[] }
+  | { rule: "planSource"; source: "ai" | "fallback" };
 
 interface TestCase {
   id: string;
   name: string;
+  /** Ask the server to skip the AI and return the rule-based plan (dev-only header). */
+  skipAi?: boolean;
   input: { zip: string; grassType: string; currentDescription: string; desiredDescription: string };
   expect: ExpectRule[];
 }
@@ -80,11 +83,15 @@ function localToday(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-async function post<T>(endpoint: string, body: unknown): Promise<{ data: T; ms: number }> {
+async function post<T>(
+  endpoint: string,
+  body: unknown,
+  extraHeaders: Record<string, string> = {},
+): Promise<{ data: T; ms: number }> {
   const started = Date.now();
   const res = await fetch(`${API}${endpoint}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...extraHeaders },
     body: JSON.stringify(body),
   });
   const ms = Date.now() - started;
@@ -160,6 +167,8 @@ function check(rule: ExpectRule, analysis: Analysis, plan: Plan, ctx: PlanContex
         .filter(Boolean);
       return { pass: bad.length === 0, text: `week titles match their dates' season (got: ${bad.join(", ") || "all match"})` };
     }
+    case "planSource":
+      return { pass: plan.source === rule.source, text: `plan source is ${rule.source} (got: ${plan.source})` };
     case "noWeeklyWatering": {
       const hits = plan.weeks
         .filter((w) => rule.weeks.includes(w.week))
@@ -192,7 +201,9 @@ function caseMarkdown(
   const lines: string[] = [`## ${tc.name}`, ""];
   lines.push("**Inputs**", "", "| Field | Value |", "|---|---|");
   lines.push(`| ZIP | ${tc.input.zip} |`, `| Grass type | ${tc.input.grassType} |`);
-  lines.push(`| Now | ${esc(tc.input.currentDescription)} |`, `| Goal | ${esc(tc.input.desiredDescription)} |`, "");
+  lines.push(`| Now | ${esc(tc.input.currentDescription)} |`, `| Goal | ${esc(tc.input.desiredDescription)} |`);
+  if (tc.skipAi) lines.push("| Plan path | AI skipped (forced rule-based fallback) |");
+  lines.push("");
 
   if ("error" in out) {
     lines.push(`**ERROR:** ${out.error}`, "", "**Checks**", "");
@@ -254,7 +265,7 @@ async function main() {
         confirmedIssues: confirmed,
         goals: analysis.goals,
         today,
-      });
+      }, tc.skipAi ? { "x-plan-skip-ai": "1" } : {});
       const ctx: PlanContext = { input: tc.input, confirmedKeys: confirmed.map((c) => c.key), today };
       const checks = tc.expect.map((r) => check(r, analysis, plan, ctx));
       const ok = checks.filter((c) => c.pass).length;

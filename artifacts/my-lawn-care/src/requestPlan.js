@@ -43,7 +43,7 @@ export async function requestPlan(values, issueKeys, analysis) {
     return await res.json();
   } catch (err) {
     console.warn("AI plan unavailable, using the rule-based plan.", err);
-    const plan = generatePlan({ zip: values.zip, grassType: values.grassType, issueKeys });
+    const plan = generatePlan({ zip: values.zip, grassType: values.grassType, today: localToday(), issueKeys });
     return { source: "fallback", summary: plan.summary, weeks: plan.weeks };
   }
 }

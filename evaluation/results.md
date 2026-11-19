@@ -1,13 +1,14 @@
 # Test case results
 
-- Run: 2026-11-19T03:07:54.911Z
+- Run: 2026-11-19T03:16:57.362Z
 - Plan date ("today"): 2026-11-19
 - API: http://localhost:80/api
-- Result: **26/28 checks passed**
+- Result: **37/37 checks passed**
 
 | Case | Analysis source | Plan source | Checks |
 |---|---|---|---|
-| 1. Typical | ai | fallback | 6/8 |
+| 1. Typical | ai | ai | 8/8 |
+| 1b. Typical (forced fallback plan) | ai | fallback | 9/9 |
 | 2. Challenge (vague) | ai | ai | 5/5 |
 | 3. Healthy-lawn regression | ai | ai | 9/9 |
 | 4. Goal-only wording | ai | ai | 6/6 |
@@ -23,7 +24,7 @@
 | Now | Mostly green but thin in spots, some dandelions and clover, a couple bare patches near the driveway. |
 | Goal | Thick, even, dark green lawn with no weeds or bare spots. |
 
-**Detected issues** (source: `ai`, 2560 ms)
+**Detected issues** (source: `ai`, 2523 ms)
 
 | Issue | Status | Evidence | Severity |
 |---|---|---|---|
@@ -42,52 +43,62 @@
 - weeds: "some dandelions and clover"
 - thin: "thin in spots"
 
-**Plan** (source: `fallback`, 17753 ms)
+**Plan** (source: `ai`, 15638 ms)
 
-> Here's a 6-week plan for Tall Fescue in the Great Lakes / Ohio Valley. Your area favors cool-season grasses, which grow best in spring and fall. You flagged bare or patchy spots, weeds, thin grass, so I've folded in a few fixes.
+> Your tall fescue is heading into dormancy, so we'll finish fall care and prepare for winter. We'll tackle those bare and thin spots in spring when conditions are right for seeding, and handle weeds now while we can.
 
-### Week 1: Get a baseline
+### Week 1: Late Fall Cleanup
 
-- **Mow:** Mow at 3-4 inches, about once a week. Start by sharpening your mower blade; clean cuts keep grass healthier. Skip mowing newly seeded spots until the new grass reaches mowing height.
-- **Water:** Give about 1 inch per week, early morning, 1-2 deep soakings (it has deep roots). Also mist seeded areas lightly once or twice a day.
-- **Fertilize:** Hold off this week. Just observe how the lawn responds to steady mowing and watering.
-- **Also:** Bare or patchy spots: Rake bare spots to loosen the soil, spread seed matched to your grass, and keep those spots lightly moist (short daily sprinkles) until seedlings are about 2 inches tall.
-- **Also:** Weeds: Pull weeds by hand after a rain when roots slip out easily, or spot-treat with a selective weed killer. Thick, tall grass is the best long-term weed control.
-
-### Week 2: Fix the trouble spots
-
-- **Mow:** Mow at 3-4 inches, about once a week. Skip mowing newly seeded spots until the new grass reaches mowing height.
-- **Water:** Give about 1 inch per week, early morning, 1-2 deep soakings (it has deep roots). Also mist seeded areas lightly once or twice a day.
-- **Fertilize:** Use a starter fertilizer on seeded areas only.
-- **Also:** Bare or patchy spots: Rake bare spots to loosen the soil, spread seed matched to your grass, and keep those spots lightly moist (short daily sprinkles) until seedlings are about 2 inches tall.
-- **Also:** Thin grass: Overseed thin areas and consider core aerating first if the soil feels hard. Keep the mower on the high end of your range.
-
-### Week 3: Build the routine
-
-- **Mow:** Mow at 3-4 inches, about once a week. Skip mowing newly seeded spots until the new grass reaches mowing height.
-- **Water:** Give about 1 inch per week, early morning, 1-2 deep soakings (it has deep roots). Also mist seeded areas lightly once or twice a day.
-- **Fertilize:** No fertilizer this week. Water any recent feeding in well.
-- **Also:** Bare or patchy spots: Rake bare spots to loosen the soil, spread seed matched to your grass, and keep those spots lightly moist (short daily sprinkles) until seedlings are about 2 inches tall.
-- **Also:** Weeds: Pull weeds by hand after a rain when roots slip out easily, or spot-treat with a selective weed killer. Thick, tall grass is the best long-term weed control.
-- **Also:** Thin grass: Overseed thin areas and consider core aerating first if the soil feels hard. Keep the mower on the high end of your range.
-
-### Week 4: Feed and thicken
+_Why: Late fall is the last chance to feed cool-season grass before it sleeps, and you can still pull weeds easily._
 
 - **Mow:** Mow at 3-4 inches, about once a week.
-- **Water:** Give about 1 inch per week, early morning, 1-2 deep soakings (it has deep roots).
-- **Fertilize:** Slow-release nitrogen at about 0.5-1 lb N per 1,000 sq ft. Fescue is a light feeder; skip heavy summer feeding.
+- **Water:** Water about 1 inch per week with 1-2 deep soakings in early morning.
+- **Fertilize:** Apply slow-release nitrogen at about 0.5-1 lb N per 1,000 sq ft. This is a good time to feed before dormancy.
+- **Also:** Pull weeds by hand after a rain when roots slip out easily, especially those dandelions and clover.
+- **Also:** Rake the bare patches near the driveway to loosen the soil; mark them so you can seed in spring.
 
-### Week 5: Fine-tune
+### Week 2: Final Fall Passes
+
+_Why: Grass is slowing down, so you'll mow less often soon; tall blades help the lawn stay competitive against weeds._
 
 - **Mow:** Mow at 3-4 inches, about once a week.
-- **Water:** Give about 1 inch per week, early morning, 1-2 deep soakings (it has deep roots).
-- **Fertilize:** No fertilizer this week. Water any recent feeding in well.
+- **Water:** Water about 1 inch per week with 1-2 deep soakings in early morning if rainfall is light.
+- **Fertilize:** No fertilizer this week.
+- **Also:** Spot-treat any remaining weeds with a selective weed killer, following the product label.
+- **Also:** Keep mowing at the high end of your range (closer to 4 inches) to help choke out weeds and keep thin spots competitive.
 
-### Week 6: Keep it going
+### Week 3: Early Winter Dormancy Begins
 
-- **Mow:** Mow at 3-4 inches, about once a week. Leave clippings on the lawn; they return free nutrients.
-- **Water:** Give about 1 inch per week, early morning, 1-2 deep soakings (it has deep roots).
-- **Fertilize:** No fertilizer this week. Water any recent feeding in well.
+_Why: Grass is dormant now and won't grow; focus shifts to protecting the lawn through winter._
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None
+
+### Week 4: Winter Rest
+
+_Why: Deep dormancy in early winter means minimal lawn care; the grass is fully at rest._
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None
+
+### Week 5: Deep Winter
+
+_Why: Coldest time of year; your lawn needs no care except to protect it from heavy foot traffic on frozen grass._
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None
+
+### Week 6: Early Winter Hold
+
+_Why: Still dormant, but spring is approaching; use this time to prepare your seeding strategy._
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None
+- **Also:** Plan to seed the bare and thin spots in March or April when soil warms and grass starts growing again.
 
 **Checks**
 
@@ -95,10 +106,95 @@
 - PASS: weeds is present (got: present)
 - PASS: thin is present (got: present)
 - PASS: shade is absent (got: absent)
-- FAIL: no fertilizer in weeks the guide rules out for this grass and region (restricted weeks: 3, 4, 5, 6; got feeding in: week 4 "Slow-release nitrogen at about 0.5-1 lb N per 1,00")
+- PASS: no fertilizer in weeks the guide rules out for this grass and region (restricted weeks: 3, 4, 5, 6; got feeding in: none)
 - PASS: week titles match their dates' season (got: all match)
 - PASS: every amount with a unit comes from the guide (got invented: none)
-- FAIL: weeks 4, 5, 6 have no weekly watering (got: week 4 "per week", week 5 "per week", week 6 "per week")
+- PASS: weeks 4, 5, 6 have no weekly watering (got: none)
+
+## 1b. Typical (forced fallback plan)
+
+**Inputs**
+
+| Field | Value |
+|---|---|
+| ZIP | 46556 |
+| Grass type | tall-fescue |
+| Now | Mostly green but thin in spots, some dandelions and clover, a couple bare patches near the driveway. |
+| Goal | Thick, even, dark green lawn with no weeds or bare spots. |
+| Plan path | AI skipped (forced rule-based fallback) |
+
+**Detected issues** (source: `ai`, 2250 ms)
+
+| Issue | Status | Evidence | Severity |
+|---|---|---|---|
+| bare | present | "a couple bare patches near the driveway" | medium |
+| weeds | present | "some dandelions and clover" | medium |
+| dry | absent |  | low |
+| thin | present | "thin in spots" | medium |
+| shade | absent |  | low |
+
+- Goals: "thick, even lawn", "dark green color", "no weeds", "no bare spots"
+- Other concerns: (none)
+
+**Confirmed issues** (the pre-checked "present" ones)
+
+- bare: "a couple bare patches near the driveway"
+- weeds: "some dandelions and clover"
+- thin: "thin in spots"
+
+**Plan** (source: `fallback`, 5 ms)
+
+> Here's a 6-week plan for Tall Fescue in the Great Lakes / Ohio Valley, starting in late fall. Your area favors cool-season grasses, which grow best in spring and fall. You flagged bare or patchy spots, weeds, thin grass, so I've folded in a few fixes. Your grass goes dormant during this plan, so those weeks are mostly rest.
+
+### Week 1: Late Fall: Get a baseline
+
+- **Mow:** Mow at 3-4 inches, about once a week. Start by sharpening your mower blade; clean cuts keep grass healthier.
+- **Water:** Give about 1 inch per week, early morning, 1-2 deep soakings (it has deep roots).
+- **Fertilize:** No fertilizer this week.
+- **Also:** Mark these spots and seed in spring.
+- **Also:** Weeds: Pull weeds by hand after a rain when roots slip out easily, or spot-treat with a selective weed killer. Thick, tall grass is the best long-term weed control.
+
+### Week 2: Late Fall: Feed the lawn
+
+- **Mow:** Mow at 3-4 inches, about once a week.
+- **Water:** Give about 1 inch per week, early morning, 1-2 deep soakings (it has deep roots).
+- **Fertilize:** Slow-release nitrogen at about 0.5-1 lb N per 1,000 sq ft. Fescue is a light feeder; skip heavy summer feeding. Follow the product label.
+
+### Week 3: Early Winter: Let it rest
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None. The grass is dormant, so it can't use fertilizer now.
+
+### Week 4: Early Winter: Let it rest
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None. The grass is dormant, so it can't use fertilizer now.
+
+### Week 5: Early Winter: Let it rest
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None. The grass is dormant, so it can't use fertilizer now.
+
+### Week 6: Early Winter: Let it rest
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None. The grass is dormant, so it can't use fertilizer now.
+
+**Checks**
+
+- PASS: bare is present (got: present)
+- PASS: weeds is present (got: present)
+- PASS: thin is present (got: present)
+- PASS: shade is absent (got: absent)
+- PASS: no fertilizer in weeks the guide rules out for this grass and region (restricted weeks: 3, 4, 5, 6; got feeding in: none)
+- PASS: week titles match their dates' season (got: all match)
+- PASS: every amount with a unit comes from the guide (got invented: none)
+- PASS: weeks 4, 5, 6 have no weekly watering (got: none)
+- PASS: plan source is fallback (got: fallback)
 
 ## 2. Challenge (vague)
 
@@ -111,7 +207,7 @@
 | Now | it's ok i guess. |
 | Goal | better. |
 
-**Detected issues** (source: `ai`, 1736 ms)
+**Detected issues** (source: `ai`, 1581 ms)
 
 | Issue | Status | Evidence | Severity |
 |---|---|---|---|
@@ -128,33 +224,32 @@
 
 - (none)
 
-**Plan** (source: `ai`, 7698 ms)
+**Plan** (source: `ai`, 13818 ms)
 
-> Welcome to lawn care! Since we're heading into winter dormancy, your grass will slow down or stop growing soon. This plan keeps things simple while your lawn rests, then sets you up for a fresh start in spring.
+> Welcome to lawn care! Since we're heading into winter dormancy, your grass will slow down significantly over the next few weeks. This plan keeps things simple while your lawn rests, then you'll be ready to build on it next spring.
 
-### Week 1: Late Fall Cleanup
+### Week 1: Late Fall Wrap-Up
 
-_Why: Your lawn is still growing a bit, so mowing helps it stay healthy before dormancy sets in._
+_Why: Late fall means your grass is winding down for winter, so mowing and watering taper off._
 
-- **Mow:** Mow about once a week at about 3 inches (a safe middle height). Never cut more than a third of the blade.
-- **Water:** Water early morning with about 1 inch per week in 1-2 deep soakings if there's been no recent rain.
+- **Mow:** Mow at about 3 inches (a safe middle height), once if needed. Grass is slowing down, so you may skip this week if it hasn't grown much.
+- **Water:** Water early morning with 1-2 deep soakings if there's been no rain. Aim for about 1 inch per week total.
 - **Fertilize:** No fertilizer this week.
-- **Also:** Rake fallen leaves so they don't smother the grass.
-- **Also:** Take a small sample of grass (roots and all) to your local garden center—they can identify your grass type, which helps with future care.
+- **Also:** Rake fallen leaves so they don't smother the lawn.
+- **Also:** Take a photo of a small grass sample and bring it to your garden center—they can identify your grass type, which helps with future care.
 
-### Week 2: Late Fall Transition
+### Week 2: Preparing for Dormancy
 
-_Why: Late fall is the transition period; your grass is slowing down as temperatures drop._
+_Why: Your grass is entering dormancy and doesn't need mowing or feeding right now._
 
-- **Mow:** Mow about once a week at about 3 inches (a safe middle height). Never cut more than a third of the blade.
-- **Water:** Water early morning with about 1 inch per week in 1-2 deep soakings if there's been no recent rain.
+- **Mow:** No mowing needed. Grass growth has essentially stopped.
+- **Water:** Water early morning with 1-2 deep soakings only if there's been no rain. Aim for about 1 inch per week total.
 - **Fertilize:** No fertilizer this week.
-- **Also:** Continue raking leaves as they fall.
-- **Also:** Watch for the first hard frost—that's when your grass will likely go dormant.
+- **Also:** Clear any remaining debris from the lawn so it stays clean through winter.
 
-### Week 3: Early Winter Rest
+### Week 3: Early Winter Dormancy
 
-_Why: Your grass is now dormant and won't grow until spring, so mowing and feeding aren't needed._
+_Why: Your lawn is dormant during early winter and needs almost no care._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
@@ -162,28 +257,28 @@ _Why: Your grass is now dormant and won't grow until spring, so mowing and feedi
 
 ### Week 4: Early Winter Rest
 
-_Why: Your lawn is dormant and resting through the cold._
+_Why: Dormant grass requires minimal attention in winter._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
 - **Fertilize:** None.
 
-### Week 5: Early Winter Rest
+### Week 5: Winter Maintenance
 
-_Why: Your lawn is dormant and resting through the cold._
-
-- **Mow:** No mowing while dormant.
-- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
-- **Fertilize:** None.
-
-### Week 6: Early Winter Rest
-
-_Why: Your lawn is dormant and resting through the cold._
+_Why: Still dormant—just monitor for extended dry spells._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
 - **Fertilize:** None.
-- **Also:** Plan ahead: once spring arrives and growth resumes, you'll be ready to start regular mowing and watering again.
+
+### Week 6: Winter Hold
+
+_Why: Your lawn stays dormant through the end of the year and will wake up in spring._
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None.
+- **Also:** Watch for signs of spring growth in late December or early January, depending on your Southeast location.
 
 **Checks**
 
@@ -204,7 +299,7 @@ _Why: Your lawn is dormant and resting through the cold._
 | Now | Healthy, thick lawn. No weeds, no bare patches, and no shade. |
 | Goal | Keep it looking this good. |
 
-**Detected issues** (source: `ai`, 1573 ms)
+**Detected issues** (source: `ai`, 1646 ms)
 
 | Issue | Status | Evidence | Severity |
 |---|---|---|---|
@@ -221,53 +316,53 @@ _Why: Your lawn is dormant and resting through the cold._
 
 - (none)
 
-**Plan** (source: `ai`, 6947 ms)
+**Plan** (source: `ai`, 7328 ms)
 
-> Your Tall Fescue is heading into dormancy, so we're wrapping up fall care and then shifting to minimal maintenance through the holidays. Keep it simple—one last feeding now, then let it rest until spring.
+> Your tall fescue is heading into dormancy, so we're wrapping up fall care and then letting it rest through winter. Keep mowing through late fall, give it one final feeding, and then step back and let the cold do its thing.
 
-### Week 1: Final Fall Feeding
+### Week 1: Final Fall Mow & Prep
 
-_Why: Late fall is the perfect time for your final nitrogen boost before the grass goes dormant and stops growing._
+_Why: Late fall is your last chance to feed before dormancy; tall fescue slows down but still benefits from one final feeding now._
 
-- **Mow:** Mow at 3-4 inches, about once a week.
-- **Water:** Water about 1 inch per week in early morning with 1-2 deep soakings.
-- **Fertilize:** Apply slow-release nitrogen at about 0.5-1 lb N per 1,000 sq ft. This is your last feeding before dormancy.
+- **Mow:** Cut at 3-4 inches, about once a week.
+- **Water:** Water at about 1 inch per week with 1-2 deep soakings in early morning.
+- **Fertilize:** Apply slow-release nitrogen at about 0.5-1 lb N per 1,000 sq ft.
 
-### Week 2: Wrapping Up Fall
+### Week 2: Late Fall Finish
 
-_Why: Growth is slowing as temperatures drop, so you're mainly tidying up before dormancy arrives._
+_Why: Growth is slowing as temperatures drop; one final mow and light watering will keep things tidy before dormancy sets in._
 
-- **Mow:** Mow at 3-4 inches if needed, about once a week.
-- **Water:** Water about 1 inch per week in early morning with 1-2 deep soakings.
+- **Mow:** Cut at 3-4 inches, about once a week.
+- **Water:** Water at about 1 inch per week with 1-2 deep soakings in early morning if rainfall is light.
 - **Fertilize:** No fertilizer this week.
 
-### Week 3: Early Winter Rest
+### Week 3: Early Winter Dormancy Begins
 
-_Why: Your grass is dormant now and won't grow until spring, so it needs almost no care._
-
-- **Mow:** No mowing while dormant.
-- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
-- **Fertilize:** None.
-
-### Week 4: Winter Dormancy
-
-_Why: Still dormant and protected by winter; just leave it alone._
+_Why: Tall fescue is now dormant; the grass has gone brown and is resting underground until spring returns._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
 - **Fertilize:** None.
 
-### Week 5: Deep Winter
+### Week 4: Winter Rest
 
-_Why: Peak winter means your grass is fully dormant and doesn't need any maintenance._
+_Why: Deep dormancy continues through early winter; your lawn needs no active care right now._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
 - **Fertilize:** None.
 
-### Week 6: Holiday Week
+### Week 5: Winter Rest
 
-_Why: Still in deep dormancy; your lawn is resting and will wake up in spring._
+_Why: Winter weather is protecting your dormant lawn; check for ice damage after any thaws, but hands-off is best._
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None.
+
+### Week 6: Winter Rest
+
+_Why: Still dormant heading into the holidays; snow and cold are keeping everything on pause until spring._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
@@ -296,7 +391,7 @@ _Why: Still in deep dormancy; your lawn is resting and will wake up in spring._
 | Now | Some brown, crispy areas by the sidewalk. |
 | Goal | Dark green and weed-free under the big oak tree. |
 
-**Detected issues** (source: `ai`, 2151 ms)
+**Detected issues** (source: `ai`, 2150 ms)
 
 | Issue | Status | Evidence | Severity |
 |---|---|---|---|
@@ -306,66 +401,67 @@ _Why: Still in deep dormancy; your lawn is resting and will wake up in spring._
 | thin | absent |  | low |
 | shade | unclear |  | low |
 
-- Goals: "dark green lawn", "weed-free under the big oak tree"
+- Goals: "Dark green lawn", "Weed-free under the oak tree"
 - Other concerns: (none)
 
 **Confirmed issues** (the pre-checked "present" ones)
 
 - dry: "brown, crispy areas by the sidewalk"
 
-**Plan** (source: `ai`, 8796 ms)
+**Plan** (source: `ai`, 14835 ms)
 
-> Your Bermuda grass is heading into dormancy as temperatures drop, so it needs less attention now. Focus on watering those dry spots deeply before winter arrives, then let your lawn rest through the cold months.
+> Your Bermuda grass is heading into dormancy as fall turns to winter—it'll go brown and stop growing, which is totally normal. Right now, focus on wrapping up the season and fixing those dry spots so your lawn can rest strong. Once spring warmth returns, your grass will green up beautifully.
 
-### Week 1: Late Fall: Final Mow & Deep Watering
+### Week 1: Late Fall Cleanup
 
-_Why: Late fall is your last chance to fix dry spots before the grass goes dormant and watering stops._
+_Why: Late fall is your last chance to mow and address watering issues before the grass goes dormant._
 
-- **Mow:** Mow at 1-2 inches if the grass still looks green and is growing; otherwise skip mowing.
-- **Water:** Check your dry spots with a screwdriver—if it won't push in 6 inches, water deeper and less often. Place a tuna can under your sprinkler to measure how much water is actually reaching the lawn.
+- **Mow:** Mow to 1-2 inches. This is likely one of the last mows before dormancy.
+- **Water:** Water the dry spots by the sidewalk deeper and less often. Place a tuna can under your sprinkler to measure how many inches it actually puts down, then adjust to reach about 1 inch per week.
 - **Fertilize:** No fertilizer this week.
-- **Also:** Take note of which areas stayed brown or crispy so you know where to focus watering efforts.
+- **Also:** Check those brown areas with a screwdriver—if it won't push in 6 inches, the soil is too dry and needs deeper soaking.
 
-### Week 2: Late Fall: Finish Prep for Dormancy
+### Week 2: Final Fall Tasks
 
-_Why: Bermuda is slowing down and will soon stop growing, so this is the final window to improve soil moisture in trouble spots._
+_Why: Your warm-season grass is shutting down as temperatures drop, so maintenance is winding down too._
 
-- **Mow:** Mow at 1-2 inches only if green growth is still visible.
-- **Water:** Continue deep, less frequent watering on dry spots. Use your tuna can measurement to confirm your sprinkler's output.
+- **Mow:** Mow to 1-2 inches if needed, but growth is slowing.
+- **Water:** Continue deep, less-frequent watering on the dry sidewalk areas. Keep checking with the tuna can to monitor coverage.
 - **Fertilize:** No fertilizer this week.
-- **Also:** This is your last week to water before dormancy—make those deep soakings count on the dry areas.
+- **Also:** Watch for the first hard freeze—once it arrives, your Bermuda will go fully dormant and turn brown.
 
-### Week 3: Early Winter: Dormant Rest
+### Week 3: Early Winter Dormancy
 
-_Why: Your Bermuda is now dormant and brown—this is normal and healthy. The grass needs no care until spring warmth returns._
-
-- **Mow:** No mowing while dormant.
-- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
-- **Fertilize:** None.
-
-### Week 4: Early Winter: Monitor & Protect
-
-_Why: Your lawn is resting through winter. Just monitor for any unusual ice damage or persistent drought._
+_Why: Bermuda is now fully dormant and brown—this is completely normal and healthy for winter in the Southeast._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
 - **Fertilize:** None.
 
-### Week 5: Early Winter: Minimal Care
+### Week 4: Winter Rest
 
-_Why: Dormant Bermuda needs almost no attention. Avoid foot traffic on frozen or icy spots if possible._
+_Why: Your grass needs complete rest during the coldest part of winter._
+
+- **Mow:** No mowing while dormant.
+- **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
+- **Fertilize:** None.
+
+### Week 5: Deep Winter
+
+_Why: Keep your lawn undisturbed so it can recover its energy for spring green-up._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
 - **Fertilize:** None.
 
-### Week 6: Early Winter: Winter Maintenance
+### Week 6: Dormancy Continues
 
-_Why: The holiday week is a good time to plan spring cleanup and think about how to prevent those dry spots next year._
+_Why: The dormant season continues through the holidays; the lawn is storing energy for its spring comeback._
 
 - **Mow:** No mowing while dormant.
 - **Water:** Only water if there has been no rain or snow for 3-4 weeks and the ground isn't frozen.
 - **Fertilize:** None.
+- **Also:** Spring is coming soon—once temperatures warm up consistently, your Bermuda will green up fast and you'll be back to regular mowing.
 
 **Checks**
 
