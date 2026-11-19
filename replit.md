@@ -16,6 +16,10 @@ A one-page prototype where DIY homeowners describe their current and desired yar
 - `POST /api/generate-plan` (same model, logic in `src/lib/planGeneration.ts`): sends the model only the guide entries for the grass type and confirmed issues, plus each week's dates labelled with a season. 30s timeout per attempt, one retry, 30/hour/IP. A plan is rejected (retry, then rule-based fallback) if it fails zod, mentions seeding/weeds/shade without the matching confirmed issue, uses "Fix the trouble spots" with no issues, uses any number not in the data it was sent, or schedules seeding outside `seedingMonths`. The seeding week is computed in code; the reseed reminder is added to later weeks if the model drops it.
 - Page flow: Form (1 of 3) -> review "Here's what I noticed" (2 of 3) -> Plan (3 of 3). `src/analyzeYard.js` and `src/requestPlan.js` call the endpoints and, if the server is unreachable or rate-limited, run the same rule-based code locally (labelled as fallback). Only issues left checked on the review screen go into the plan.
 
+## Evaluation
+
+- `pnpm --filter @workspace/scripts run test-cases` runs `evaluation/test-cases.json` against both endpoints (confirming the "present" issues, as the review screen does) and writes `evaluation/results.md` with PASS/FAIL per expect rule. Needs the API server running; uses ~4 requests per endpoint (rate limit 30/hour). `TODAY=YYYY-MM-DD` overrides the plan date.
+
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)

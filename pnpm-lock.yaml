@@ -670,6 +670,10 @@ importers:
   lib/lawn-guide: {}
 
   scripts:
+    dependencies:
+      '@workspace/lawn-guide':
+        specifier: workspace:*
+        version: link:../lib/lawn-guide
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
