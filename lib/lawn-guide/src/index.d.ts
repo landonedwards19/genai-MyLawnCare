@@ -23,6 +23,7 @@ export interface LawnGuide {
   regions: Record<string, { name: string; climate: string }>;
   climateNotes: Record<string, string>;
   seedingMonths: Record<GrassType["season"], number[]>;
+  noFeedingMonths: Record<GrassType["season"], number[]>;
   weekTitles: string[];
 }
 
@@ -59,3 +60,23 @@ export declare function generatePlan(inputs: {
   desiredPhotoCount?: number;
   issueKeys?: string[];
 }): RuleBasedPlan;
+
+// planRules.js
+export declare const MONTHS: string[];
+export declare const RESEED_REMINDER: string;
+export type PlanTopic = "seeding" | "weeds" | "shade";
+export declare const TOPIC_PATTERNS: Record<PlanTopic, { allowedBy: IssueKey[]; pattern: RegExp }>;
+export interface PlanWeekDates {
+  week: number;
+  start: Date;
+  end: Date;
+  dates: string;
+}
+export declare function seasonOf(date: Date): string;
+export declare function planWeeks(today: string): PlanWeekDates[];
+export declare function seedingWeek(today: string, season: GrassType["season"]): number | null;
+export declare function feedingAllowed(grassType: string, zip: string, date: Date): boolean;
+export declare function saysNoFeeding(text: string): boolean;
+export declare function titleSeasonMismatch(title: string, week: PlanWeekDates): string | null;
+export declare function amountsIn(text: string): string[];
+export declare function allowedAmounts(grassType: string, issueKeys: string[]): Set<string>;

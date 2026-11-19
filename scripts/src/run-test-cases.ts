@@ -16,7 +16,18 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { lawnGuide } from "@workspace/lawn-guide";
+import {
+  lawnGuide,
+  planWeeks,
+  seasonOf,
+  feedingAllowed,
+  saysNoFeeding,
+  titleSeasonMismatch,
+  amountsIn,
+  allowedAmounts,
+  TOPIC_PATTERNS,
+  type PlanTopic,
+} from "@workspace/lawn-guide";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const CASES_FILE = path.join(ROOT, "evaluation/test-cases.json");
@@ -25,13 +36,16 @@ const API = (process.env.API_BASE_URL ?? "http://localhost:80/api").replace(/\/$
 
 type IssueKey = "bare" | "weeds" | "dry" | "thin" | "shade";
 type Status = "present" | "absent" | "unclear";
-type Topic = "seeding" | "weeds" | "shade";
+type Topic = PlanTopic;
 
 type ExpectRule =
   | { rule: "issue"; key: IssueKey; status: Status | "not-present" }
   | { rule: "noIssuePresent" }
   | { rule: "noWeekTitle"; title: string }
-  | { rule: "planExcludes"; topics: Topic[] };
+  | { rule: "planExcludes"; topics: Topic[] }
+  | { rule: "feedingTiming" }
+  | { rule: "seasonTitles" }
+  | { rule: "amountsFromGuide" };
 
 interface TestCase {
   id: string;
@@ -58,13 +72,6 @@ interface CheckResult {
   text: string;
 }
 
-// Words that count as a seeding, weed, or shade step in a plan.
-const TOPIC_PATTERNS: Record<Topic, RegExp> = {
-  seeding: /\b(seeds?|seeded|seeding|seedlings?|overseed\w*|reseed\w*|sprouts?)\b/i,
-  weeds: /\b(weed(?!-and-feed)\w*|dandelions?|clover|crabgrass|herbicides?|pre-emergent)\b/i,
-  shade: /\b(shade|shady|shaded)\b/i,
-};
-
 function localToday(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -90,7 +97,13 @@ function planText(plan: Plan): string {
   ].join("\n");
 }
 
-function check(rule: ExpectRule, analysis: Analysis, plan: Plan): CheckResult {
+interface PlanContext {
+  input: TestCase["input"];
+  confirmedKeys: IssueKey[];
+  today: string;
+}
+
+function check(rule: ExpectRule, analysis: Analysis, plan: Plan, ctx: PlanContext): CheckResult {
   const status = (key: IssueKey) => analysis.issues.find((i) => i.key === key)?.status ?? "missing";
   switch (rule.rule) {
     case "issue": {
@@ -113,11 +126,44 @@ function check(rule: ExpectRule, analysis: Analysis, plan: Plan): CheckResult {
     case "planExcludes": {
       const text = planText(plan);
       const found = rule.topics
-        .map((t) => ({ t, hit: text.match(TOPIC_PATTERNS[t])?.[0] }))
+        .map((t) => ({ t, hit: text.match(TOPIC_PATTERNS[t].pattern)?.[0] }))
         .filter((x) => x.hit);
       return {
         pass: found.length === 0,
         text: `plan has no ${rule.topics.join(", ")} steps (got: ${found.map((f) => `${f.t} "${f.hit}"`).join(", ") || "none"})`,
+      };
+    }
+    case "feedingTiming": {
+      const weeks = planWeeks(ctx.today);
+      const restricted = plan.weeks.filter((w) => {
+        const dates = weeks[w.week - 1];
+        return dates && !feedingAllowed(ctx.input.grassType, ctx.input.zip, dates.start);
+      });
+      const fed = restricted.filter((w) => !saysNoFeeding(w.fertilize));
+      return {
+        pass: fed.length === 0,
+        text: `no fertilizer in weeks the guide rules out for this grass and region (restricted weeks: ${
+          restricted.map((w) => w.week).join(", ") || "none"
+        }; got feeding in: ${fed.map((w) => `week ${w.week} "${w.fertilize.slice(0, 50)}"`).join(", ") || "none"})`,
+      };
+    }
+    case "seasonTitles": {
+      const weeks = planWeeks(ctx.today);
+      const bad = plan.weeks
+        .map((w) => {
+          const dates = weeks[w.week - 1];
+          const hit = dates ? titleSeasonMismatch(w.title, dates) : null;
+          return hit && dates ? `week ${w.week} "${w.title}" (${seasonOf(dates.start)})` : null;
+        })
+        .filter(Boolean);
+      return { pass: bad.length === 0, text: `week titles match their dates' season (got: ${bad.join(", ") || "all match"})` };
+    }
+    case "amountsFromGuide": {
+      const allowed = allowedAmounts(ctx.input.grassType, ctx.confirmedKeys);
+      const invented = [...new Set(amountsIn(planText(plan)).filter((a) => !allowed.has(a)))];
+      return {
+        pass: invented.length === 0,
+        text: `every amount with a unit comes from the guide (got invented: ${invented.join(", ") || "none"})`,
       };
     }
   }
@@ -195,7 +241,8 @@ async function main() {
         goals: analysis.goals,
         today,
       });
-      const checks = tc.expect.map((r) => check(r, analysis, plan));
+      const ctx: PlanContext = { input: tc.input, confirmedKeys: confirmed.map((c) => c.key), today };
+      const checks = tc.expect.map((r) => check(r, analysis, plan, ctx));
       const ok = checks.filter((c) => c.pass).length;
       passed += ok;
       total += checks.length;

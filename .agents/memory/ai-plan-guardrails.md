@@ -7,3 +7,6 @@ claude-haiku-4-5 ignores calendar/season rules stated only in the prompt: it see
 
 **Why:** prompt-only rules were tested on 2026-11-19 and failed repeatedly; deterministic hints fixed them.
 **How to apply:** compute timing facts in code (week dates with season labels, seeding week from `seedingMonths`) and pass them as data; keep the numbers-must-appear-in-input check; prefer patching small omissions (reseed reminder) over rejecting, since every rejection costs ~10s and risks the fallback.
+
+Topic word checks need exceptions for normal lawn phrases: "shade out weeds" (mowing advice) caused a false shade violation and pushed a valid plan to fallback. Keep topic patterns in the shared lawn-guide planRules so the server and the test runner never disagree.
+A fallback plan can pass every content check, so read the plan source in evaluation results, not just PASS/FAIL.
