@@ -47,3 +47,40 @@ export const AnalyzeYardResponse = zod.object({
 })
 
 
+/**
+ * Uses a small AI model to write a plan from the confirmed issues, goals, today's date, and the lawn guide's numbers for the grass type. Falls back to the basic rule-based plan if the AI is unavailable or its plan breaks the rules. Limited to 30 requests per hour per IP.
+ * @summary Write a 4-6 week lawn plan
+ */
+export const generatePlanBodyZipRegExp = new RegExp('^[0-9]{5}$');
+
+
+export const generatePlanBodyTodayRegExp = new RegExp('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+
+
+export const GeneratePlanBody = zod.object({
+  "zip": zod.string().regex(generatePlanBodyZipRegExp),
+  "region": zod.string().min(1).describe('Region name from the lawn guide; must match the ZIP\'s region.'),
+  "grassType": zod.string().min(1).describe('Grass type key from the lawn guide.'),
+  "confirmedIssues": zod.array(zod.object({
+  "key": zod.enum(['bare', 'weeds', 'dry', 'thin', 'shade']),
+  "evidence": zod.string()
+})),
+  "goals": zod.array(zod.string()),
+  "today": zod.string().regex(generatePlanBodyTodayRegExp).describe('The user\'s local date, YYYY-MM-DD.')
+})
+
+export const GeneratePlanResponse = zod.object({
+  "source": zod.enum(['ai', 'fallback']),
+  "summary": zod.string(),
+  "weeks": zod.array(zod.object({
+  "week": zod.number().int(),
+  "title": zod.string(),
+  "mow": zod.string(),
+  "water": zod.string(),
+  "fertilize": zod.string(),
+  "extra": zod.array(zod.string()),
+  "why": zod.string().optional().describe('One sentence explaining the week. Absent in the rule-based plan.')
+}))
+})
+
+

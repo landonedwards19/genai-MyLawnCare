@@ -5,15 +5,16 @@ A one-page prototype where DIY homeowners describe their current and desired yar
 ## My Lawn Care app (artifacts/my-lawn-care)
 
 - Plain HTML/CSS/vanilla JS served by Vite (user requirement: no React, backend, DB, accounts, or external APIs).
-- Guidance text and the keyword matcher live in the shared plain-JS package `lib/lawn-guide` (`lawnGuide.js` = editable data, `detectIssues.js` = matcher) so both the page and the API server use them. Plan logic: `generatePlan(inputs)` in `src/generatePlan.js`, simulated and meant to be swapped for an AI/weather call later. `src/main.js` handles screens, validation, and rendering only.
+- Guidance text, the keyword matcher, and the rule-based plan live in the shared plain-JS package `lib/lawn-guide` (`lawnGuide.js` = editable data incl. `seedingMonths`, `detectIssues.js` = matcher, `generatePlan.js` = rule-based plan) so both the page and the API server use them. `src/main.js` handles screens, validation, and rendering only.
 
-## Yard analysis API (artifacts/api-server)
+## AI endpoints (artifacts/api-server)
 
 - `POST /api/analyze-yard` uses Replit AI Integrations (Anthropic, `claude-haiku-4-5`, no user key); AI calls stay server-side only.
 - 8s timeout per attempt, one retry, then falls back to the keyword matcher (`source: "fallback"`). Descriptions truncated to 1,000 chars. In-memory rate limit 30/hour/IP (resets on restart).
 - A "present" issue whose evidence isn't an exact phrase from currentDescription is downgraded to "unclear" in code.
 - Logic in `src/lib/yardAnalysis.ts`.
-- Page flow: Form (1 of 3) -> review "Here's what I noticed" (2 of 3) -> Plan (3 of 3). `src/analyzeYard.js` calls the endpoint and, if it's unreachable or rate-limited, runs the same keyword matcher locally (labelled as fallback). Only issues left checked on the review screen are passed to `generatePlan` as `issueKeys`.
+- `POST /api/generate-plan` (same model, logic in `src/lib/planGeneration.ts`): sends the model only the guide entries for the grass type and confirmed issues, plus each week's dates labelled with a season. 30s timeout per attempt, one retry, 30/hour/IP. A plan is rejected (retry, then rule-based fallback) if it fails zod, mentions seeding/weeds/shade without the matching confirmed issue, uses "Fix the trouble spots" with no issues, uses any number not in the data it was sent, or schedules seeding outside `seedingMonths`. The seeding week is computed in code; the reseed reminder is added to later weeks if the model drops it.
+- Page flow: Form (1 of 3) -> review "Here's what I noticed" (2 of 3) -> Plan (3 of 3). `src/analyzeYard.js` and `src/requestPlan.js` call the endpoints and, if the server is unreachable or rate-limited, run the same rule-based code locally (labelled as fallback). Only issues left checked on the review screen go into the plan.
 
 ## Run & Operate
 

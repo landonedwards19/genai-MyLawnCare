@@ -71,6 +71,69 @@ export interface YardAnalysis {
   otherConcerns: string[];
 }
 
+export type ConfirmedIssueKey = typeof ConfirmedIssueKey[keyof typeof ConfirmedIssueKey];
+
+
+export const ConfirmedIssueKey = {
+  bare: 'bare',
+  weeds: 'weeds',
+  dry: 'dry',
+  thin: 'thin',
+  shade: 'shade',
+} as const;
+
+export interface ConfirmedIssue {
+  key: ConfirmedIssueKey;
+  evidence: string;
+}
+
+export interface PlanInput {
+  /** @pattern ^[0-9]{5}$ */
+  zip: string;
+  /**
+     * Region name from the lawn guide; must match the ZIP's region.
+     * @minLength 1
+     */
+  region: string;
+  /**
+     * Grass type key from the lawn guide.
+     * @minLength 1
+     */
+  grassType: string;
+  confirmedIssues: ConfirmedIssue[];
+  goals: string[];
+  /**
+     * The user's local date, YYYY-MM-DD.
+     * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
+     */
+  today: string;
+}
+
+export interface PlanWeek {
+  week: number;
+  title: string;
+  mow: string;
+  water: string;
+  fertilize: string;
+  extra: string[];
+  /** One sentence explaining the week. Absent in the rule-based plan. */
+  why?: string;
+}
+
+export type LawnPlanSource = typeof LawnPlanSource[keyof typeof LawnPlanSource];
+
+
+export const LawnPlanSource = {
+  ai: 'ai',
+  fallback: 'fallback',
+} as const;
+
+export interface LawnPlan {
+  source: LawnPlanSource;
+  summary: string;
+  weeks: PlanWeek[];
+}
+
 export interface HealthStatus {
   status: string;
 }

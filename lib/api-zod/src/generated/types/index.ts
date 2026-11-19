@@ -6,8 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './confirmedIssue';
+export * from './confirmedIssueKey';
 export * from './errorResponse';
 export * from './healthStatus';
+export * from './lawnPlan';
+export * from './lawnPlanSource';
+export * from './planInput';
+export * from './planWeek';
 export * from './yardAnalysis';
 export * from './yardAnalysisSource';
 export * from './yardInput';

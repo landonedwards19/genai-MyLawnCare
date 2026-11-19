@@ -22,6 +22,8 @@ import type {
 import type {
   ErrorResponse,
   HealthStatus,
+  LawnPlan,
+  PlanInput,
   YardAnalysis,
   YardInput
 } from './api.schemas';
@@ -218,5 +220,94 @@ export const useAnalyzeYard = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getAnalyzeYardMutationOptions(options));
+    }
+
+export const getGeneratePlanUrl = () => {
+
+
+
+
+  return `/api/generate-plan`
+}
+
+/**
+ * Uses a small AI model to write a plan from the confirmed issues, goals, today's date, and the lawn guide's numbers for the grass type. Falls back to the basic rule-based plan if the AI is unavailable or its plan breaks the rules. Limited to 30 requests per hour per IP.
+ * @summary Write a 4-6 week lawn plan
+ */
+export const generatePlan = async (planInput: PlanInput, options?: Parameters<typeof customFetch>[1]): Promise<LawnPlan> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<LawnPlan>(getGeneratePlanUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(planInput)
+  }
+);}
+
+
+
+
+
+export const getGeneratePlanMutationKey = () => ['generatePlan'] as const;
+
+export const getGeneratePlanMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generatePlan>>, TError,GeneratePlanMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generatePlan>>, TError,GeneratePlanMutationVariables, TContext> => {
+
+const mutationKey = getGeneratePlanMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generatePlan>>, GeneratePlanMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  generatePlan(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GeneratePlanMutationResult = NonNullable<Awaited<ReturnType<typeof generatePlan>>>
+    export type GeneratePlanMutationBody = BodyType<PlanInput>
+    export type GeneratePlanMutationError = ErrorType<ErrorResponse>
+    export type GeneratePlanMutationVariables = {data: BodyType<PlanInput>}
+
+    /**
+ * @summary Write a 4-6 week lawn plan
+ */
+export const useGeneratePlan = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generatePlan>>, TError,GeneratePlanMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generatePlan>>,
+        TError,
+        GeneratePlanMutationVariables,
+        TContext
+      > => {
+      return useMutation(getGeneratePlanMutationOptions(options));
     }
 

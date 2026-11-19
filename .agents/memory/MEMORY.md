@@ -1,2 +1,3 @@
 - [Client IP behind Replit proxy](proxy-client-ip.md) — edge overwrites X-Forwarded-For, so trust proxy=true gives the real client IP for rate limits.
 - [Orval POST client needs dom.iterable](orval-dom-iterable.md) — generated fetch code uses Headers.entries(); api-client-react tsconfig must include "dom.iterable".
+- [AI plan guardrails](ai-plan-guardrails.md) — Haiku ignores season/timing rules in prompts; compute dates/seeding week in code and check numbers.

@@ -135,6 +135,7 @@
             <button type="button" class="btn btn-ghost" id="edit-btn">Back to edit</button>
             <button type="button" class="btn btn-primary" id="confirm-btn">Looks right. Make my plan.</button>
           </div>
+          <p class="loading" id="plan-loading" role="status" aria-live="polite"></p>
         </div>
       </section>
 
@@ -142,12 +143,13 @@
       <section id="screen-results" class="screen" aria-labelledby="results-title" hidden>
         <div class="card">
           <p class="eyebrow">Step 3 of 3</p>
+          <p class="plan-banner" id="plan-banner" role="status" hidden>AI plan unavailable. Showing the basic rule-based plan.</p>
           <h2 id="results-title" tabindex="-1">Your lawn plan</h2>
           <p class="summary-text" id="plan-summary"></p>
           <dl class="inputs" id="input-summary"></dl>
         </div>
         <ol class="weeks" id="weeks"></ol>
-        <p class="sim-note">This plan is a simulated preview built from general lawn-care rules of thumb, not live weather or a soil test. Adjust for rain and what you see in your yard.</p>
+        <p class="sim-note" id="plan-note"></p>
         <div class="actions center">
           <button type="button" class="btn btn-primary" id="restart-btn">Start Over</button>
         </div>

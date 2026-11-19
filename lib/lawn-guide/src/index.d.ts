@@ -22,6 +22,7 @@ export interface LawnGuide {
   issues: Record<IssueKey, GuideIssue>;
   regions: Record<string, { name: string; climate: string }>;
   climateNotes: Record<string, string>;
+  seedingMonths: Record<GrassType["season"], number[]>;
   weekTitles: string[];
 }
 
@@ -31,3 +32,30 @@ export declare function detectIssues(
   currentDescription: string,
   desiredDescription: string,
 ): Array<GuideIssue & { key: IssueKey }>;
+
+export interface RuleBasedPlanWeek {
+  week: number;
+  title: string;
+  mow: string;
+  water: string;
+  fertilize: string;
+  extra: string[];
+}
+
+export interface RuleBasedPlan {
+  summary: string;
+  region: { name: string; climate: string };
+  grassLabel: string;
+  issues: Array<GuideIssue & { key: IssueKey }>;
+  weeks: RuleBasedPlanWeek[];
+}
+
+export declare function generatePlan(inputs: {
+  zip: string;
+  grassType: string;
+  currentDescription?: string;
+  desiredDescription?: string;
+  currentPhotoCount?: number;
+  desiredPhotoCount?: number;
+  issueKeys?: string[];
+}): RuleBasedPlan;

@@ -1,15 +1,16 @@
 import "./styles.css";
 import { lawnGuide } from "@workspace/lawn-guide";
-import { generatePlan } from "./generatePlan.js";
 import { analyzeYard } from "./analyzeYard.js";
+import { requestPlan } from "./requestPlan.js";
 
 const $ = (id) => document.getElementById(id);
 const screens = { start: $("screen-start"), form: $("screen-form"), review: $("screen-review"), results: $("screen-results") };
 const form = $("lawn-form");
 
 const photoUrls = { current: [], desired: [] };
-// Form values that were last sent for analysis, kept for the plan step.
+// Form values and yard analysis from the last submit, kept for the plan step.
 let reviewedValues = null;
+let lastAnalysis = null;
 
 function show(name, focusEl) {
   Object.entries(screens).forEach(([key, el]) => { el.hidden = key !== name; });
@@ -124,13 +125,23 @@ function photoValue(key) {
   return wrap;
 }
 
+const PLAN_NOTES = {
+  ai: "Plan written by AI from the issues you confirmed and our lawn-care rules. Weather is not live yet (planned).",
+  fallback: "Basic rule-based plan",
+};
+
 function renderPlan(values, plan) {
+  const grass = lawnGuide.grassTypes[values.grassType];
+  const region = lawnGuide.regions[values.zip.charAt(0)];
+  const isAi = plan.source === "ai";
+  $("plan-banner").hidden = isAi;
+  $("plan-note").textContent = PLAN_NOTES[isAi ? "ai" : "fallback"];
   $("plan-summary").textContent = plan.summary;
   const dl = $("input-summary");
   dl.innerHTML = "";
   dl.append(
-    summaryItem("ZIP and region", `${values.zip} - ${plan.region.name}`),
-    summaryItem("Grass type", plan.grassLabel),
+    summaryItem("ZIP and region", `${values.zip} - ${region ? region.name : "Unknown region"}`),
+    summaryItem("Grass type", grass ? grass.label : values.grassType),
     summaryItem("Your yard now", shorten(values.currentDescription)),
     summaryItem("The yard you want", shorten(values.desiredDescription)),
     summaryItem("Photos of now", photoValue("current")),
@@ -153,7 +164,9 @@ function renderPlan(values, plan) {
     add("task-water", "Water", w.water);
     add("task-fert", "Fertilize", w.fertilize);
     if (w.extra && w.extra.length) add("task-extra", "Also this week", w.extra.join(" "));
-    li.append(head, tasks);
+    li.append(head);
+    if (w.why) li.append(el("p", "week-why", w.why));
+    li.append(tasks);
     ol.append(li);
   });
 }
@@ -243,6 +256,7 @@ form.addEventListener("submit", async (e) => {
   try {
     const analysis = await analyzeYard(values);
     reviewedValues = values;
+    lastAnalysis = analysis;
     renderReview(analysis);
     show("review", $("review-title"));
   } finally {
@@ -253,15 +267,21 @@ form.addEventListener("submit", async (e) => {
 $("edit-btn").addEventListener("click", () => show("form", $("currentDescription")));
 
 $("confirm-btn").addEventListener("click", async () => {
-  const values = reviewedValues;
-  const plan = await generatePlan({
-    ...values,
-    currentPhotoCount: photoUrls.current.length,
-    desiredPhotoCount: photoUrls.desired.length,
-    issueKeys: checkedIssueKeys(),
-  });
-  renderPlan(values, plan);
-  show("results", $("results-title"));
+  const btn = $("confirm-btn");
+  if (btn.disabled) return;
+  btn.disabled = true;
+  $("edit-btn").disabled = true;
+  $("plan-loading").textContent = "Writing your plan...";
+  try {
+    const values = reviewedValues;
+    const plan = await requestPlan(values, checkedIssueKeys(), lastAnalysis);
+    renderPlan(values, plan);
+    show("results", $("results-title"));
+  } finally {
+    btn.disabled = false;
+    $("edit-btn").disabled = false;
+    $("plan-loading").textContent = "";
+  }
 });
 
 $("restart-btn").addEventListener("click", () => {
@@ -275,5 +295,6 @@ $("restart-btn").addEventListener("click", () => {
   $("issue-list").innerHTML = "";
   $("missed-list").innerHTML = "";
   reviewedValues = null;
+  lastAnalysis = null;
   show("start", $("start-btn"));
 });

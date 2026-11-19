@@ -1,0 +1,9 @@
+---
+name: AI plan guardrails (Haiku)
+description: What the small model gets wrong when writing lawn plans and which rules had to move into code
+---
+
+claude-haiku-4-5 ignores calendar/season rules stated only in the prompt: it seeded Bermuda in November, jumped from November to "spring" within 6 weeks, and fed St. Augustine twice in 3 weeks despite "every 6-8 weeks". It also does arithmetic on guide text ("half an inch higher" -> "4.5 inches").
+
+**Why:** prompt-only rules were tested on 2026-11-19 and failed repeatedly; deterministic hints fixed them.
+**How to apply:** compute timing facts in code (week dates with season labels, seeding week from `seedingMonths`) and pass them as data; keep the numbers-must-appear-in-input check; prefer patching small omissions (reseed reminder) over rejecting, since every rejection costs ~10s and risks the fallback.
