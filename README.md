@@ -1,39 +1,65 @@
- # My Lawn Care
+# My Lawn Care
 
-My Lawn Care is a web app where homeowners enter their ZIP code, grass type, and a description (or photos) of their current yard and the yard they want, and get back a simple week-by-week plan for when and how to mow, water, and fertilize.
+My Lawn Care is a web app that turns a plain description of your yard into a simple week-by-week lawn plan. You enter your ZIP code, your grass type, a few sentences about how your yard looks now, and how you want it to look. An AI model reads what you wrote, shows you the problems it found so you can correct them, and then writes a 4 to 6 week plan for mowing, watering, and fertilizing.
+
+**Intended user:** first-time homeowners who mow their own lawn and want it to look good, but don't know what to do or when to do it.
 
 ## Open the Prototype
 
 **Live app:** https://my-lawn-care.replit.app
-The app is password-protected; the password is included in my Canvas submission.
 
-The app code lives in `artifacts/my-lawn-care` (`generatePlan.js` builds the plan, `lawnGuide.js` holds the lawn-care tips, `main.js` runs the screens).
+The app is password-protected. The password is included in my Canvas submission.
 
-## What the First Working Slice Lets a User Do
+How to use it:
 
-1. Start on the welcome screen and click "Let's get started."
-2. Fill in the form: ZIP code, grass type (or "Not sure"), a short description of their yard now, and a description of the yard they want. Uploading photos is optional.
-3. Click "Make my plan" to get a 4–6 week plan that says when and how high to mow, how much to water, and when to fertilize, plus extra steps for problems they mentioned, like bare spots or weeds.
-4. Click "Start Over" to try different inputs.
+1. Click **Let's get started**.
+2. Enter a 5-digit ZIP code, pick your grass type (or "Not sure"), and describe your yard now and the yard you want. Photos are optional and are not used yet.
+3. Click **Continue**. The review screen shows the problems the AI found, with the exact words from your description that each one is based on. Uncheck anything that is wrong, or add something it missed.
+4. Click **Looks right. Make my plan.** to get your plan. It takes about 10 to 15 seconds.
+5. Click **Start Over** to try different inputs.
 
-If a required field is left blank, the app shows a message explaining what's missing instead of making a plan.
+## Demo Video
 
-## AI Role: Working vs. Simulated
+**Draft demo (Google Drive):** https://drive.google.com/file/d/1SAYOh2GiqVY1CL48pXkx8nbxbvywwUfd/view?usp=drivesdk
 
-- **What the future AI will do:** Read the user's yard description and photos, check live and upcoming weather for their ZIP code, and generate a personalized maintenance plan that adjusts over time.
-- **What works now:** The full user flow, form validation, region detection from the ZIP code, and a plan built for the selected grass type.
-- **What is simulated:** The AI. Plans are put together from prewritten lawn-care tips and keyword matching, not a live AI model or real weather data. The results page tells the user this.
+Access has been granted to Emelia Hughes and Samuel Huang.
 
-## Test Cases
+## Code and Assets
 
-| Test | Input or action | What happened | Pass, partial, or fail |
-| --- | --- | --- | --- |
-| Typical case | ZIP 46556, Grass Type: Tall Fescue. Yard now: "Mostly green but thin in spots, some dandelions and clover, a couple bare patches near the driveway." Goal: "Thick, even, dark green lawn with no weeds or bare spots." | Generated a 6 week plan for the Great Lakes & Ohio Valley: mow at 3–4 in. weekly, about 1 in. of water per week, and fertilizer timing for a cool-season grass. It correctly picked up the bare spots, weeds, and thin grass and added steps to fix them. It also added shade advice even though shade was never mentioned. | Partial |
-| Challenge case | ZIP 33101 (Miami), Grass Type: "Not sure." Yard now: "it's ok i guess." Goal: "better." | Recognized the Southeast region and gave a cautious 4 week plan with middle of the range mowing and watering advice and one light feeding. It suggested taking a sample to a garden center to identify the grass. One minor issue: Week 2 is titled "Fix the trouble spots" even though no trouble spots were described. | Pass |
-| Invalid or empty case | Clicked "Make my plan" with every field left blank. | No plan was generated. Friendly messages appeared under each required field (for example, "Just need your 5-digit ZIP code so we can match your climate"), and the user stayed on the form to fix them. | Pass |
+The prototype is built and hosted in Replit. All of its code is stored in this repository.
 
-## Current Limitations
+| Folder | What it holds |
+|---|---|
+| `artifacts/my-lawn-care` | The web app the user sees: `index.html`, `src/main.js` (screens), `src/analyzeYard.js` and `src/requestPlan.js` (calls to the server), `src/styles.css` |
+| `artifacts/api-server` | The server where the AI runs: `src/lib/yardAnalysis.ts` (reads the yard description), `src/lib/planGeneration.ts` (writes and checks the plan), `src/routes/`, and `src/middlewares/rateLimit.ts` |
+| `lib/lawn-guide` | The lawn-care guide the plan must follow (`lawnGuide.js`) and the rule-based backup plan (`generatePlan.js`) |
+| `evaluation` | Automated test cases (`test-cases.json`) and their latest results (`results.md`) |
+| `scripts/src/run-test-cases.ts` | Script that runs the automated test cases |
 
-1. **The AI is fake for now.** The plan comes from prewritten lawn-care tips, not a real AI, and it doesn't check your actual weather. Next, I'd implement a real AI and live weather scanning so the plan changes based on the current and upcoming weather.
-2. **It sometimes misreads what you type.** The app looks for certain words, so it can get confused. For example, it gave shade tips when no one mentioned shade. Next, I'd let the AI understand what the user means, or add simple checkboxes for common yard problems.
-3. **Photos don't do anything yet, and nothing is saved.** You can upload yard photos, but the app only displays them and doesn't use them, and everything you type is lost when you close the page. Next, I'd have the AI look at the photos and let users save their yard info.
+## How the AI Works
+
+The app uses Claude Haiku to read the user's description of their yard, find the problems they mention, and then write a 4 to 6 week plan for mowing, watering, and fertilizing. Before the plan is made, the user can check and uncheck the problems the AI found. The plan must use measurements from a lawn-care guide, and if the AI breaks those rules, the app shows a simpler backup plan instead.
+
+| Part | Status |
+|---|---|
+| AI reads the yard description | Working |
+| AI writes the plan | Working |
+| Review screen and automatic plan checks | Working |
+| Live weather for your ZIP code | Planned |
+| AI reading uploaded photos | Planned |
+| Noticing recent fertilizer or weed killer use | Not built yet (next priority) |
+
+## Revision Documentation
+
+See **[revision.md](revision.md)** for:
+
+- Priority improvements made in this revision
+- Response to peer feedback
+- Five test cases, a before-and-after comparison, and a repeat test of the live AI
+- What the evidence tells us
+- Risk response
+- Remaining limitations and next priorities
+
+## AI-Use Disclosure
+
+See **[ai-use-disclosure.md](ai-use-disclosure.md)** for the tools I used, how AI helped build the app, representative prompts, where I used my own judgment, how I checked the work, and how AI works inside the product.
